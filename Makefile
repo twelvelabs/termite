@@ -15,17 +15,20 @@ format: ## Format the code
 
 .PHONY: lint
 lint: ## Lint the code
+	@if ! command -v golangci-lint >/dev/null 2>&1; then brew install golangci-lint; fi
 	golangci-lint run
 
 .PHONY: test
 test: export APP_ENV := test
 test: ## Test the code
+	go mod tidy
 	go test -cover -coverprofile=coverage.tmp ./...
 	@cat coverage.tmp | grep -v "_mock.go" | grep -v "_enum.go" > coverage.tmp.new
 	@mv coverage.tmp.new coverage.tmp
 
 .PHONY: generate
 generate:
+	@if ! command -v moq >/dev/null 2>&1; then go install github.com/matryer/moq@latest; fi
 	go generate ./...
 
 .PHONY: build
@@ -52,8 +55,6 @@ setup: ## Bootstrap for local development
 	@if ! command -v gh >/dev/null 2>&1; then echo "Unable to find gh!"; exit 1; fi
 	@if ! command -v git >/dev/null 2>&1; then echo "Unable to find git!"; exit 1; fi
 	@if ! command -v go >/dev/null 2>&1; then echo "Unable to find go!"; exit 1; fi
-	@if ! command -v golangci-lint >/dev/null 2>&1; then echo "Unable to find golangci-lint!"; exit 1; fi
-	go install github.com/matryer/moq@latest
 
 # Via https://www.thapaliya.com/en/writings/well-documented-makefiles/
 # Note: The `##@` comments determine grouping
