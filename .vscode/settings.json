@@ -1,0 +1,17 @@
+{
+    "go.lintTool": "golangci-lint",
+    "gopls": {
+        "local": "github.com/twelvelabs/termite",
+        "ui.semanticTokens": true
+    },
+    "cSpell.words": [
+        "gostub",
+        "ioutil",
+        "ireturn",
+        "isatty",
+        "nolint",
+        "safeexec",
+        "stretchr",
+        "testutil"
+    ]
+}
