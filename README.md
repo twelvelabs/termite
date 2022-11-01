@@ -1,5 +1,7 @@
 # Termite
 
+[![codecov](https://codecov.io/gh/twelvelabs/termite/branch/main/graph/badge.svg?token=7BSJPVRDPZ)](https://codecov.io/gh/twelvelabs/termite)
+
 Termite is collection of utilities for building CLI tools in Go.
 
 A few things to note:
