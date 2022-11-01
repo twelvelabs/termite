@@ -28,6 +28,12 @@ jobs:
       - name: Test
         run: make test
 
+      - name: Coverage
+        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # pin@v3
+        with:
+          files: coverage.tmp
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   lint:
     runs-on: ubuntu-latest
     permissions:
