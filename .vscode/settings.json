@@ -5,6 +5,9 @@
         "ui.semanticTokens": true
     },
     "cSpell.words": [
+        "codecov",
+        "golangci",
+        "goreleaser",
         "gostub",
         "ioutil",
         "ireturn",

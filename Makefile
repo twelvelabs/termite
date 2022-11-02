@@ -17,6 +17,8 @@ format: ## Format the code
 lint: ## Lint the code
 	@if ! command -v golangci-lint >/dev/null 2>&1; then brew install golangci-lint; fi
 	golangci-lint run
+	@if ! command -v golangci-lint >/dev/null 2>&1; then go install github.com/rhysd/actionlint/cmd/actionlint@latest; fi
+	actionlint
 
 .PHONY: test
 test: export APP_ENV := test
@@ -41,7 +43,7 @@ release: ## Create a new GitHub release
 	git fetch --all --tags
 	@if ! command -v svu >/dev/null 2>&1; then echo "Unable to find svu!"; exit 1; fi
 	@if [[ "$$(svu next)" == "$$(svu current)" ]]; then echo "Nothing to release!" && exit 1; fi
-	gh release create "$$(svu next)" --generate-notes
+	git tag -a "$$(svu next)" -m "Release version $$(svu next)" && git push origin --tags
 
 .PHONY: clean
 clean: ## Clean build artifacts
