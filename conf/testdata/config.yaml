@@ -1,0 +1,8 @@
+---
+name: aaa
+count: 10
+enabled: true
+tags:
+  - foo
+  - bar
+  - baz
