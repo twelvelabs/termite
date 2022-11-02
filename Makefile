@@ -17,6 +17,8 @@ format: ## Format the code
 lint: ## Lint the code
 	@if ! command -v golangci-lint >/dev/null 2>&1; then brew install golangci-lint; fi
 	golangci-lint run
+	@if ! command -v golangci-lint >/dev/null 2>&1; then go install github.com/rhysd/actionlint/cmd/actionlint@latest; fi
+	actionlint
 
 .PHONY: test
 test: export APP_ENV := test

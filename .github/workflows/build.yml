@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     needs:
-      - build
+      - test
       - lint
     steps:
       - name: Checkout code
