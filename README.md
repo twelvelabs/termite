@@ -2,7 +2,7 @@
 
 [![codecov](https://codecov.io/gh/twelvelabs/termite/branch/main/graph/badge.svg?token=7BSJPVRDPZ)](https://codecov.io/gh/twelvelabs/termite)
 
-Termite is collection of utilities for building CLI tools in Go.
+Termite is a collection of utilities for building CLI tools in Go.
 
 A few things to note:
 
@@ -21,17 +21,30 @@ go get github.com/twelvelabs/termite
 package main
 
 import (
+    "github.com/twelvelabs/termite/conf"
     "github.com/twelvelabs/termite/ioutil"
     "github.com/twelvelabs/termite/ui"
 )
 
 func main() {
+    type Config struct {
+        DatabaseURL string `default:"postgres://0.0.0.0:5432/db" validate:"required,url"`
+        Debug       bool   `default:"true"`
+    }
+
+    // Loads and validates config values from ~/.config/my-app/config.yaml
+    config, _ := conf.NewLoader(&Config{}, XDGPath("my-app")).Load()
+
     ios := ioutil.System()
     messenger := ui.NewMessenger(ios)
+    prompter := ui.NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 
-    messenger.Info("Working...")
-    ios.StartProgressIndicator()
-    ios.StopProgressIndicator()
+    ok, _ := prompter.Confirm("Proceed?", true, "Some help text...")
+    if ok {
+        ios.StartProgressIndicator()
+        messenger.Info("Working...")
+        ios.StopProgressIndicator()
+    }
     messenger.Success("Done")
 }
 ```
@@ -39,6 +52,7 @@ func main() {
 Output:
 
 ```text
+? Proceed? Yes
 • Working...
 ✓ Done
 ```
