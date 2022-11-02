@@ -41,7 +41,7 @@ release: ## Create a new GitHub release
 	git fetch --all --tags
 	@if ! command -v svu >/dev/null 2>&1; then echo "Unable to find svu!"; exit 1; fi
 	@if [[ "$$(svu next)" == "$$(svu current)" ]]; then echo "Nothing to release!" && exit 1; fi
-	gh release create "$$(svu next)" --generate-notes
+	git tag -a "$$(svu next)" -m "Release version $$(svu next)" && git push origin --tags
 
 .PHONY: clean
 clean: ## Clean build artifacts
