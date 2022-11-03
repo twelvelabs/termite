@@ -1,6 +1,6 @@
 package ui
 
-//go:generate moq -rm -out prompter_test.go . Prompter
+//go:generate moq --pkg=uimock --out=mock/prompter.go . Prompter
 
 // Prompter is an interface for types that prompt for user input.
 type Prompter interface {

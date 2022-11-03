@@ -7,7 +7,7 @@ SHELL := /bin/bash
 .PHONY: coverage
 coverage: ## Show test coverage
 	@make test
-	go tool cover -html=coverage.tmp
+	go tool cover --html=coverage.tmp
 
 .PHONY: format
 format: ## Format the code
@@ -24,9 +24,7 @@ lint: ## Lint the code
 test: export APP_ENV := test
 test: ## Test the code
 	go mod tidy
-	go test -cover -coverprofile=coverage.tmp ./...
-	@cat coverage.tmp | grep -v "_mock.go" | grep -v "_enum.go" > coverage.tmp.new
-	@mv coverage.tmp.new coverage.tmp
+	go test --coverprofile=coverage.tmp $$(go list ./... | grep -v /mock)
 
 .PHONY: generate
 generate:
