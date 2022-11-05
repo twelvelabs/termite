@@ -1,32 +1,5 @@
 "github.com/twelvelabs/termite/log"
-"github.com/twelvelabs/termite/rest"
 "github.com/twelvelabs/termite/run"
-
-RESTClient{
-    Client: http.Client
-}
-RESTClient := rest.NewRESTClient()
-rest.NewRESTClient().Stub()
-    replaces Client.Transport w/ registry, returns self
-rest.NewRESTClient().RegisterStub()
-    creates stub, delegates to Client.Transport.RegisterStub(), returns self
-
-RESTClient.RegisterStub(
-    // rest.Request("GET", "some/path"),
-    // rest.RequestWithQuery("GET", "some/path", query),
-    rest.Get("some/path"),
-    rest.StringResponse(`{"foo": "bar"}`),
-    // rest.WithHeader(
-    //     "X-Something", "lol",
-    //     rest.StringResponse(`{"foo": "bar"}`),
-    // ),
-    // rest.WithStatus(
-    //     201,
-    //     rest.StringResponse(`{"foo": "bar"}`),
-    // ),
-    // rest.JSONResponse(someStruct),
-    // rest.FileResponse("testdata/something.json"),
-)
 
 CmdClient{
     stubbed: bool

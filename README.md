@@ -1,5 +1,7 @@
 # Termite
 
+[![docs](https://pkg.go.dev/badge/github.com/twelvelabs/termite.svg)](https://pkg.go.dev/github.com/twelvelabs/termite)
+[![build](https://github.com/twelvelabs/termite/actions/workflows/build.yml/badge.svg)](https://github.com/twelvelabs/termite/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/twelvelabs/termite/branch/main/graph/badge.svg?token=7BSJPVRDPZ)](https://codecov.io/gh/twelvelabs/termite)
 
 Termite is a collection of utilities for building CLI tools in Go.
@@ -21,6 +23,7 @@ go get github.com/twelvelabs/termite
 package main
 
 import (
+    "github.com/twelvelabs/termite/api"
     "github.com/twelvelabs/termite/conf"
     "github.com/twelvelabs/termite/ioutil"
     "github.com/twelvelabs/termite/ui"
@@ -28,8 +31,8 @@ import (
 
 func main() {
     type Config struct {
-        DatabaseURL string `default:"postgres://0.0.0.0:5432/db" validate:"required,url"`
-        Debug       bool   `default:"true"`
+        BaseURL string `default:"https://0.0.0.0/api/v1" validate:"required,url"`
+        Debug   bool   `default:"true"`
     }
 
     // Loads and validates config values from ~/.config/my-app/config.yaml
@@ -39,10 +42,24 @@ func main() {
     messenger := ui.NewMessenger(ios)
     prompter := ui.NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 
+    client := api.NewRESTClient(&api.ClientOptions{
+        BaseURL: config.BaseURL,
+    })
+
+    type APIResponse struct {
+        Status string `json:"statusMessage"`
+    }
+
     ok, _ := prompter.Confirm("Proceed?", true, "Some help text...")
     if ok {
-        ios.StartProgressIndicator()
-        messenger.Info("Working...")
+        ios.StartProgressIndicator("Requesting")
+        resp := &APIResponse{}
+        err := client.Get("/some/endpoint", resp)
+        if err != nil {
+            messenger.Failure("API failure: %v", err)
+        } else {
+            messenger.Info("API success: %v", resp.Status)
+        }
         ios.StopProgressIndicator()
     }
     messenger.Success("Done")
@@ -53,7 +70,7 @@ Output:
 
 ```text
 ? Proceed? Yes
-• Working...
+• API success: some status message
 ✓ Done
 ```
 
