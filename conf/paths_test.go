@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -20,6 +21,18 @@ func TestConfigDir_WhenWindows(t *testing.T) {
 
 	// but prefers $AppData/$name
 	t.Setenv(appData, "DATA_DIR")
+
+	fmt.Println("")
+	fmt.Println(" ==> os.Environ")
+	for _, line := range os.Environ() {
+		fmt.Println(line)
+	}
+	fmt.Println("")
+	fmt.Println("")
+
+	assert.Equal(t, true, isWindowsFunc())
+	assert.Equal(t, "DATA_DIR", os.Getenv(appData))
+
 	assert.Equal(t, filepath.Join("DATA_DIR", "my-app"), ConfigDir("my-app"))
 
 	// XDG dir takes precedence over the above.
