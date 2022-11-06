@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
-	github.com/adrg/xdg v0.4.0
 	github.com/briandowns/spinner v1.19.0
 	github.com/creasty/defaults v1.6.0
 	github.com/go-playground/locales v0.14.0
