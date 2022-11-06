@@ -24,7 +24,7 @@ lint: ## Lint the code
 test: export APP_ENV := test
 test: ## Test the code
 	go mod tidy
-	go test --coverprofile=coverage.tmp $$(go list ./... | grep -v /mock)
+	go test --coverprofile=coverage.tmp ./...
 
 .PHONY: generate
 generate:

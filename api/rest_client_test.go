@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/prashantv/gostub"
+	"github.com/prashantv/gostub" // spell: disable-line
 	"github.com/stretchr/testify/assert"
 )
 
