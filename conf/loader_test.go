@@ -16,7 +16,7 @@ func ExampleLoader() {
 		Debug       bool   `default:"true"`
 	}
 
-	loader := NewLoader(&Config{}, XDGPath("termite"))
+	loader := NewLoader(&Config{}, ConfigFile("termite"))
 	config, err := loader.Load()
 	if err != nil {
 		panic(err)

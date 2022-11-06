@@ -36,7 +36,7 @@ func main() {
     }
 
     // Loads and validates config values from ~/.config/my-app/config.yaml
-    config, _ := conf.NewLoader(&Config{}, XDGPath("my-app")).Load()
+    config, _ := conf.NewLoader(&Config{}, ConfigFile("my-app")).Load()
 
     ios := ioutil.System()
     messenger := ui.NewMessenger(ios)
