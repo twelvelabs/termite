@@ -7,7 +7,8 @@ SHELL := /bin/bash
 .PHONY: coverage
 coverage: ## Show test coverage
 	@make test
-	go tool cover --html=coverage.tmp
+	@if ! command -v gocovsh >/dev/null 2>&1; then go install github.com/orlangure/gocovsh@latest; fi
+	gocovsh --profile coverage.out
 
 .PHONY: format
 format: ## Format the code
@@ -17,14 +18,14 @@ format: ## Format the code
 lint: ## Lint the code
 	@if ! command -v golangci-lint >/dev/null 2>&1; then brew install golangci-lint; fi
 	golangci-lint run
-	@if ! command -v golangci-lint >/dev/null 2>&1; then go install github.com/rhysd/actionlint/cmd/actionlint@latest; fi
+	@if ! command -v actionlint >/dev/null 2>&1; then go install github.com/rhysd/actionlint/cmd/actionlint@latest; fi
 	actionlint
 
 .PHONY: test
 test: export APP_ENV := test
 test: ## Test the code
 	go mod tidy
-	go test --coverprofile=coverage.tmp ./...
+	go test --coverprofile=coverage.out ./...
 
 .PHONY: generate
 generate:
@@ -45,7 +46,7 @@ release: ## Create a new GitHub release
 
 .PHONY: clean
 clean: ## Clean build artifacts
-	rm ./coverage.tmp
+	rm ./coverage.out
 
 
 ##@ Other
