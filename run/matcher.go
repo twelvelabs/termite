@@ -1,13 +1,7 @@
 package run
 
 import (
-	"io"
 	"regexp"
-)
-
-var (
-	// for stubbing
-	ioReadAll = io.ReadAll
 )
 
 // Matcher is function that matches commands.
@@ -33,14 +27,8 @@ func MatchAll(matchers ...Matcher) Matcher {
 // MatchStdin returns a matcher that matches against command stdin.
 func MatchStdin(s string) Matcher {
 	return func(cmd *Cmd) bool {
-		if cmd.Stdin == nil {
-			return false
-		}
-		buf, err := ioReadAll(cmd.Stdin)
-		if err != nil {
-			panic(err)
-		}
-		return s == string(buf)
+		data, _ := cmd.PeekStdin()
+		return s == string(data)
 	}
 }
 

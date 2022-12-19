@@ -2,10 +2,9 @@ package run
 
 import (
 	"bytes"
-	"errors"
+	"io"
 	"testing"
 
-	"github.com/prashantv/gostub"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -112,16 +111,16 @@ func TestMatcher(t *testing.T) {
 	}
 }
 
-func TestMatcher_ioReadAllError(t *testing.T) {
-	stubs := gostub.StubFunc(&ioReadAll, nil, errors.New("boom"))
-	defer stubs.Reset()
-
+func TestMatchStdin_ShouldRewindReader(t *testing.T) {
 	matcher := MatchStdin("howdy")
 
-	cmd := NewClient().Command("/bin/echo")
-	cmd.Stdin = bytes.NewBufferString("")
+	cmd := NewClient().Command("/bin/cat")
+	cmd.Stdin = bytes.NewBufferString("howdy")
 
-	assert.PanicsWithError(t, "boom", func() {
-		matcher(cmd)
-	})
+	ok := matcher(cmd)
+	assert.Equal(t, true, ok)
+
+	data, err := io.ReadAll(cmd.Stdin)
+	assert.NoError(t, err)
+	assert.Equal(t, "howdy", string(data))
 }

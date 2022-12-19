@@ -64,9 +64,9 @@ func (e *StubExecutor) Output(cmd *Cmd) ([]byte, error) {
 		e.mu.Unlock()
 		n := len(matches)
 		if n == 0 {
-			return nil, fmt.Errorf("no registered stubs matching: %v", cmd)
+			return nil, fmt.Errorf("no registered stubs matching: %s", cmd.DebugString())
 		} else {
-			return nil, fmt.Errorf("wanted %d of only %d stubs matching: %v", n+1, n, cmd)
+			return nil, fmt.Errorf("wanted %d of only %d stubs matching: %s", n+1, n, cmd.DebugString())
 		}
 	}
 
