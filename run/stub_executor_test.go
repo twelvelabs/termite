@@ -41,6 +41,32 @@ func TestStubExecutor_StubbingMethods(t *testing.T) {
 	assert.Nil(t, buf)
 }
 
+func TestStubExecutor_ExitCode(t *testing.T) {
+	executor := NewStubExecutor()
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		StringResponse("Sun Nov 13 22:00:00 CST 2022"),
+	)
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		ErrorResponse(NewExitError(123)),
+	)
+
+	cmd := NewClient().Command("/bin/date")
+	assert.Equal(t, -1, executor.ExitCode(cmd))
+
+	// Run() should set the exit code when successful.
+	err := executor.Run(cmd)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, executor.ExitCode(cmd))
+
+	cmd = NewClient().Command("/bin/date")
+	// Run() should set the exit code when the executor returns an exit error.
+	err = executor.Run(cmd)
+	assert.ErrorContains(t, err, "exit status 123")
+	assert.Equal(t, 123, executor.ExitCode(cmd))
+}
+
 func TestStubExecutor_OutputWhenStdoutAlreadySet(t *testing.T) {
 	executor := NewStubExecutor()
 
@@ -50,6 +76,23 @@ func TestStubExecutor_OutputWhenStdoutAlreadySet(t *testing.T) {
 	buf, err := executor.Output(cmd)
 	assert.ErrorContains(t, err, "Stdout already set")
 	assert.Nil(t, buf)
+}
+
+func TestStubExecutor_OutputWhenExitError(t *testing.T) {
+	executor := NewStubExecutor()
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		ErrorResponse(NewExitError(123)),
+	)
+
+	cmd := NewClient().Command("/bin/date")
+
+	_, err := executor.Output(cmd)
+	assert.ErrorContains(t, err, "exit status 123")
+
+	// TODO: change to use StderrResponse()
+	exitErr := err.(*ExitError)
+	assert.Equal(t, "", string(exitErr.Stderr))
 }
 
 func TestStubExecutor_Run(t *testing.T) {

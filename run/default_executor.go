@@ -9,6 +9,10 @@ var (
 type defaultExecutor struct {
 }
 
+func (e *defaultExecutor) ExitCode(cmd *Cmd) int {
+	return cmd.Cmd.ProcessState.ExitCode()
+}
+
 func (e *defaultExecutor) Output(cmd *Cmd) ([]byte, error) {
 	return cmd.Cmd.Output()
 }

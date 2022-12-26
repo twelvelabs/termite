@@ -8,6 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCmd_ExitCode(t *testing.T) {
+	client := NewClient()
+	client.Executor = &ExecutorMock{
+		ExitCodeFunc: func(cmd *Cmd) int {
+			return 123
+		},
+	}
+	cmd := client.Command("/bin/echo", "foo", "bar")
+	assert.Equal(t, 123, cmd.ExitCode())
+}
+
 func TestCmd_Output(t *testing.T) {
 	client := NewClient()
 	client.Executor = &ExecutorMock{

@@ -17,6 +17,9 @@ var _ Executor = &ExecutorMock{}
 //
 //		// make and configure a mocked Executor
 //		mockedExecutor := &ExecutorMock{
+//			ExitCodeFunc: func(cmd *Cmd) int {
+//				panic("mock out the ExitCode method")
+//			},
 //			OutputFunc: func(cmd *Cmd) ([]byte, error) {
 //				panic("mock out the Output method")
 //			},
@@ -30,6 +33,9 @@ var _ Executor = &ExecutorMock{}
 //
 //	}
 type ExecutorMock struct {
+	// ExitCodeFunc mocks the ExitCode method.
+	ExitCodeFunc func(cmd *Cmd) int
+
 	// OutputFunc mocks the Output method.
 	OutputFunc func(cmd *Cmd) ([]byte, error)
 
@@ -38,6 +44,11 @@ type ExecutorMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// ExitCode holds details about calls to the ExitCode method.
+		ExitCode []struct {
+			// Cmd is the cmd argument value.
+			Cmd *Cmd
+		}
 		// Output holds details about calls to the Output method.
 		Output []struct {
 			// Cmd is the cmd argument value.
@@ -49,8 +60,41 @@ type ExecutorMock struct {
 			Cmd *Cmd
 		}
 	}
-	lockOutput sync.RWMutex
-	lockRun    sync.RWMutex
+	lockExitCode sync.RWMutex
+	lockOutput   sync.RWMutex
+	lockRun      sync.RWMutex
+}
+
+// ExitCode calls ExitCodeFunc.
+func (mock *ExecutorMock) ExitCode(cmd *Cmd) int {
+	if mock.ExitCodeFunc == nil {
+		panic("ExecutorMock.ExitCodeFunc: method is nil but Executor.ExitCode was just called")
+	}
+	callInfo := struct {
+		Cmd *Cmd
+	}{
+		Cmd: cmd,
+	}
+	mock.lockExitCode.Lock()
+	mock.calls.ExitCode = append(mock.calls.ExitCode, callInfo)
+	mock.lockExitCode.Unlock()
+	return mock.ExitCodeFunc(cmd)
+}
+
+// ExitCodeCalls gets all the calls that were made to ExitCode.
+// Check the length with:
+//
+//	len(mockedExecutor.ExitCodeCalls())
+func (mock *ExecutorMock) ExitCodeCalls() []struct {
+	Cmd *Cmd
+} {
+	var calls []struct {
+		Cmd *Cmd
+	}
+	mock.lockExitCode.RLock()
+	calls = mock.calls.ExitCode
+	mock.lockExitCode.RUnlock()
+	return calls
 }
 
 // Output calls OutputFunc.

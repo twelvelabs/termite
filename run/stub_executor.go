@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os/exec"
 	"sync"
 )
 
@@ -45,6 +44,10 @@ func (e *StubExecutor) RegisterStub(matcher Matcher, responder Responder) *StubE
 	return e
 }
 
+func (e *StubExecutor) ExitCode(cmd *Cmd) int {
+	return cmd.exitCode
+}
+
 func (e *StubExecutor) Output(cmd *Cmd) ([]byte, error) {
 	if cmd.Stdout != nil {
 		return nil, errors.New("run: Stdout already set")
@@ -62,8 +65,9 @@ func (e *StubExecutor) Output(cmd *Cmd) ([]byte, error) {
 
 	err := e.Run(cmd)
 	if err != nil && captureErr {
-		if ee, ok := err.(*exec.ExitError); ok {
-			ee.Stderr = stderr.Bytes()
+		var exitErr *ExitError
+		if errors.As(err, &exitErr) {
+			exitErr.Stderr = stderr.Bytes()
 		}
 	}
 	return stdout.Bytes(), err
@@ -101,12 +105,18 @@ func (e *StubExecutor) Run(cmd *Cmd) error {
 	e.mu.Unlock()
 
 	stdout, _, err := stub.Responder(cmd)
-
 	if cmd.Stdout != nil {
 		_, we := cmd.Stdout.Write(stdout)
 		if we != nil {
 			panic(we)
 		}
+	}
+
+	var exitErr *ExitError
+	if errors.As(err, &exitErr) {
+		cmd.exitCode = exitErr.Code()
+	} else if err == nil {
+		cmd.exitCode = 0
 	}
 
 	return err
