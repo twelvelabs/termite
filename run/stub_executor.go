@@ -100,10 +100,10 @@ func (e *StubExecutor) Run(cmd *Cmd) error {
 	e.Commands = append(e.Commands, cmd)
 	e.mu.Unlock()
 
-	out, err := stub.Responder(cmd)
+	stdout, _, err := stub.Responder(cmd)
 
 	if cmd.Stdout != nil {
-		_, we := cmd.Stdout.Write(out)
+		_, we := cmd.Stdout.Write(stdout)
 		if we != nil {
 			panic(we)
 		}

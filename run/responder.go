@@ -6,12 +6,12 @@ import (
 )
 
 // Responder is a function that returns stubbed command output.
-type Responder func(cmd *Cmd) ([]byte, error)
+type Responder func(cmd *Cmd) (stdout []byte, stderr []byte, err error)
 
 // ErrorResponse creates a responder that returns err.
 func ErrorResponse(err error) Responder {
-	return func(cmd *Cmd) ([]byte, error) {
-		return nil, err
+	return func(cmd *Cmd) ([]byte, []byte, error) {
+		return nil, nil, err
 	}
 }
 
@@ -27,7 +27,7 @@ func ErrorResponse(err error) Responder {
 //	// err == nil
 func RegexpResponse(pattern string, index int) Responder {
 	r := regexp.MustCompile(pattern)
-	return func(cmd *Cmd) ([]byte, error) {
+	return func(cmd *Cmd) ([]byte, []byte, error) {
 		cmdStr := cmd.String()
 		matches := r.FindStringSubmatch(cmdStr)
 		if index >= len(matches) {
@@ -40,13 +40,13 @@ func RegexpResponse(pattern string, index int) Responder {
 				),
 			)
 		}
-		return []byte(matches[index]), nil
+		return []byte(matches[index]), nil, nil
 	}
 }
 
 // StringResponse creates a responder that returns s.
 func StringResponse(s string) Responder {
-	return func(cmd *Cmd) ([]byte, error) {
-		return []byte(s), nil
+	return func(cmd *Cmd) ([]byte, []byte, error) {
+		return []byte(s), nil, nil
 	}
 }
