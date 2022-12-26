@@ -1,7 +1,10 @@
 package run
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,13 +30,103 @@ func TestStubExecutor_StubbingMethods(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Sun Nov 13 22:00:00 CST 2022", string(buf))
 
+	cmd = NewClient().Command("/bin/date")
 	buf, err = executor.Output(cmd)
 	assert.NoError(t, err)
 	assert.Equal(t, "Sun Nov 13 22:05:00 CST 2022", string(buf))
 
+	cmd = NewClient().Command("/bin/date")
 	buf, err = executor.Output(cmd)
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching: /bin/date")
 	assert.Nil(t, buf)
+}
+
+func TestStubExecutor_ExitCode(t *testing.T) {
+	executor := NewStubExecutor()
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		StringResponse("Sun Nov 13 22:00:00 CST 2022"),
+	)
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		ErrorResponse(NewExitError(123)),
+	)
+
+	cmd := NewClient().Command("/bin/date")
+	assert.Equal(t, -1, executor.ExitCode(cmd))
+
+	// Run() should set the exit code when successful.
+	err := executor.Run(cmd)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, executor.ExitCode(cmd))
+
+	cmd = NewClient().Command("/bin/date")
+	// Run() should set the exit code when the executor returns an exit error.
+	err = executor.Run(cmd)
+	assert.ErrorContains(t, err, "exit status 123")
+	assert.Equal(t, 123, executor.ExitCode(cmd))
+}
+
+func TestStubExecutor_OutputWhenStdoutAlreadySet(t *testing.T) {
+	executor := NewStubExecutor()
+
+	cmd := NewClient().Command("/bin/date")
+	cmd.Stdout = &bytes.Buffer{}
+
+	buf, err := executor.Output(cmd)
+	assert.ErrorContains(t, err, "Stdout already set")
+	assert.Nil(t, buf)
+}
+
+func TestStubExecutor_OutputWhenExitError(t *testing.T) {
+	executor := NewStubExecutor()
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		ErrorResponse(NewExitError(123)),
+	)
+
+	cmd := NewClient().Command("/bin/date")
+
+	_, err := executor.Output(cmd)
+	assert.ErrorContains(t, err, "exit status 123")
+
+	// TODO: change to use StderrResponse()
+	exitErr := err.(*ExitError)
+	assert.Equal(t, "", string(exitErr.Stderr))
+}
+
+func TestStubExecutor_Run(t *testing.T) {
+	executor := NewStubExecutor()
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		StringResponse("Sun Nov 13 22:00:00 CST 2022"),
+	)
+
+	stdout := &bytes.Buffer{}
+	cmd := NewClient().Command("/bin/date")
+	cmd.Stdout = stdout
+
+	err := executor.Run(cmd)
+	assert.NoError(t, err)
+	assert.Equal(t, "Sun Nov 13 22:00:00 CST 2022", stdout.String())
+}
+
+func TestStubExecutor_RunWhenWriteError(t *testing.T) {
+	executor := NewStubExecutor()
+	executor.RegisterStub(
+		MatchString("/bin/date"),
+		StringResponse("Sun Nov 13 22:00:00 CST 2022"),
+	)
+
+	stdout := &brokenWriter{
+		err: errors.New("boom"),
+	}
+	cmd := NewClient().Command("/bin/date")
+	cmd.Stdout = stdout
+
+	assert.PanicsWithError(t, "boom", func() {
+		_ = executor.Run(cmd)
+	})
 }
 
 func TestStubExecutor_VerifyWhenNoStubs(t *testing.T) {
@@ -88,4 +181,14 @@ func (mt *mockTest) Helper() {
 func (mt *mockTest) Errorf(line string, args ...interface{}) {
 	mt.ErrorfCalled = true
 	mt.Msg = fmt.Sprintf(line, args...)
+}
+
+var _ io.Writer = &brokenWriter{}
+
+type brokenWriter struct {
+	err error
+}
+
+func (w *brokenWriter) Write(p []byte) (int, error) {
+	return 0, w.err
 }

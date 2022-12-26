@@ -12,7 +12,13 @@ import (
 type Cmd struct {
 	*exec.Cmd
 
-	client *Client
+	client   *Client
+	exitCode int // used when stubbing
+}
+
+// ExitCode returns the exit code for the command.
+func (c *Cmd) ExitCode() int {
+	return c.client.Executor.ExitCode(c)
 }
 
 // Output runs the command and returns its standard output.

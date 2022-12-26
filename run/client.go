@@ -21,13 +21,13 @@ type Client struct {
 // the given arguments.
 func (c *Client) Command(name string, arg ...string) *Cmd {
 	cmd := exec.Command(name, arg...)
-	return &Cmd{Cmd: cmd, client: c}
+	return &Cmd{Cmd: cmd, client: c, exitCode: -1}
 }
 
 // CommandContext is like Command but includes a context.
 func (c *Client) CommandContext(ctx context.Context, name string, arg ...string) *Cmd {
 	cmd := exec.CommandContext(ctx, name, arg...)
-	return &Cmd{Cmd: cmd, client: c}
+	return &Cmd{Cmd: cmd, client: c, exitCode: -1}
 }
 
 // IsStubbed returns true if the executor is configured for stubbing.

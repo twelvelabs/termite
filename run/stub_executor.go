@@ -1,6 +1,8 @@
 package run
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -42,7 +44,36 @@ func (e *StubExecutor) RegisterStub(matcher Matcher, responder Responder) *StubE
 	return e
 }
 
+func (e *StubExecutor) ExitCode(cmd *Cmd) int {
+	return cmd.exitCode
+}
+
 func (e *StubExecutor) Output(cmd *Cmd) ([]byte, error) {
+	if cmd.Stdout != nil {
+		return nil, errors.New("run: Stdout already set")
+	}
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+
+	cmd.Stdout = &stdout
+
+	captureErr := cmd.Stderr == nil
+	if captureErr {
+		cmd.Stderr = &stderr
+	}
+
+	err := e.Run(cmd)
+	if err != nil && captureErr {
+		var exitErr *ExitError
+		if errors.As(err, &exitErr) {
+			exitErr.Stderr = stderr.Bytes()
+		}
+	}
+	return stdout.Bytes(), err
+}
+
+func (e *StubExecutor) Run(cmd *Cmd) error {
 	e.mu.Lock()
 	var stub *Stub
 	var matches []*Stub
@@ -64,20 +95,30 @@ func (e *StubExecutor) Output(cmd *Cmd) ([]byte, error) {
 		e.mu.Unlock()
 		n := len(matches)
 		if n == 0 {
-			return nil, fmt.Errorf("no registered stubs matching: %s", cmd.DebugString())
+			return fmt.Errorf("no registered stubs matching: %s", cmd.DebugString())
 		} else {
-			return nil, fmt.Errorf("wanted %d of only %d stubs matching: %s", n+1, n, cmd.DebugString())
+			return fmt.Errorf("wanted %d of only %d stubs matching: %s", n+1, n, cmd.DebugString())
 		}
 	}
 
 	e.Commands = append(e.Commands, cmd)
 	e.mu.Unlock()
 
-	return stub.Responder(cmd)
-}
+	stdout, _, err := stub.Responder(cmd)
+	if cmd.Stdout != nil {
+		_, we := cmd.Stdout.Write(stdout)
+		if we != nil {
+			panic(we)
+		}
+	}
 
-func (e *StubExecutor) Run(cmd *Cmd) error {
-	_, err := e.Output(cmd)
+	var exitErr *ExitError
+	if errors.As(err, &exitErr) {
+		cmd.exitCode = exitErr.Code()
+	} else if err == nil {
+		cmd.exitCode = 0
+	}
+
 	return err
 }
 
