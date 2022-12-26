@@ -44,9 +44,40 @@ func RegexpResponse(pattern string, index int) Responder {
 	}
 }
 
-// StringResponse creates a responder that returns s.
+// StringResponse creates a responder that returns the given string via stdout.
 func StringResponse(s string) Responder {
 	return func(cmd *Cmd) ([]byte, []byte, error) {
 		return []byte(s), nil, nil
 	}
+}
+
+// StdoutResponse creates a responder that returns the given bytes via stdout.
+// If the provided exit code is non-zero, then an exit error will also be returned.
+func StdoutResponse(stdout []byte, code int) Responder {
+	return func(cmd *Cmd) ([]byte, []byte, error) {
+		return stdout, nil, errorForCode(code)
+	}
+}
+
+// StderrResponse creates a responder that returns the given bytes via stderr.
+// If the provided exit code is non-zero, then an exit error will also be returned.
+func StderrResponse(stderr []byte, code int) Responder {
+	return func(cmd *Cmd) ([]byte, []byte, error) {
+		return nil, stderr, errorForCode(code)
+	}
+}
+
+// MuxResponse creates a responder that returns values for both stdout and stderr.
+// If the provided exit code is non-zero, then an exit error will also be returned.
+func MuxResponse(stdout []byte, stderr []byte, code int) Responder {
+	return func(cmd *Cmd) ([]byte, []byte, error) {
+		return stdout, stderr, errorForCode(code)
+	}
+}
+
+func errorForCode(code int) error {
+	if code == 0 {
+		return nil
+	}
+	return NewExitError(code)
 }

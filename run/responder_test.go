@@ -45,3 +45,57 @@ func TestStringResponse(t *testing.T) {
 	assert.Nil(t, stderr)
 	assert.NoError(t, err)
 }
+
+func TestStdoutResponse(t *testing.T) {
+	cmd := NewClient().Command("/bin/echo")
+	responder := StdoutResponse([]byte("foo"), 0)
+	stdout, stderr, err := responder(cmd)
+	assert.Equal(t, "foo", string(stdout))
+	assert.Nil(t, stderr)
+	assert.NoError(t, err)
+}
+
+func TestStdoutResponse_NonZero(t *testing.T) {
+	cmd := NewClient().Command("/bin/echo")
+	responder := StdoutResponse([]byte("foo"), 123)
+	stdout, stderr, err := responder(cmd)
+	assert.Equal(t, "foo", string(stdout))
+	assert.Nil(t, stderr)
+	assert.ErrorContains(t, err, "exit status 123")
+}
+
+func TestStderrResponse(t *testing.T) {
+	cmd := NewClient().Command("/bin/echo")
+	responder := StderrResponse([]byte("foo"), 0)
+	stdout, stderr, err := responder(cmd)
+	assert.Nil(t, stdout)
+	assert.Equal(t, "foo", string(stderr))
+	assert.NoError(t, err)
+}
+
+func TestStderrResponse_NonZero(t *testing.T) {
+	cmd := NewClient().Command("/bin/echo")
+	responder := StderrResponse([]byte("foo"), 123)
+	stdout, stderr, err := responder(cmd)
+	assert.Nil(t, stdout)
+	assert.Equal(t, "foo", string(stderr))
+	assert.ErrorContains(t, err, "exit status 123")
+}
+
+func TestMuxResponse(t *testing.T) {
+	cmd := NewClient().Command("/bin/echo")
+	responder := MuxResponse([]byte("foo"), []byte("bar"), 0)
+	stdout, stderr, err := responder(cmd)
+	assert.Equal(t, "foo", string(stdout))
+	assert.Equal(t, "bar", string(stderr))
+	assert.NoError(t, err)
+}
+
+func TestMuxResponse_NonZero(t *testing.T) {
+	cmd := NewClient().Command("/bin/echo")
+	responder := MuxResponse([]byte("foo"), []byte("bar"), 123)
+	stdout, stderr, err := responder(cmd)
+	assert.Equal(t, "foo", string(stdout))
+	assert.Equal(t, "bar", string(stderr))
+	assert.ErrorContains(t, err, "exit status 123")
+}
