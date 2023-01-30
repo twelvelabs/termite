@@ -7,7 +7,7 @@ require (
 	github.com/briandowns/spinner v1.20.0
 	github.com/creasty/defaults v1.6.0
 	github.com/go-playground/locales v0.14.1
-	github.com/go-playground/universal-translator v0.18.0
+	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/mattn/go-isatty v0.0.17
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
