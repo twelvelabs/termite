@@ -21,20 +21,20 @@ copies or substantial portions of the Software.
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/mgutz/ansi" //cspell: disable-line
 )
 
 var (
-	magenta = ansi.ColorFunc("magenta")
-	cyan    = ansi.ColorFunc("cyan")
-	red     = ansi.ColorFunc("red")
-	yellow  = ansi.ColorFunc("yellow")
-	blue    = ansi.ColorFunc("blue")
-	green   = ansi.ColorFunc("green")
-	gray    = ansi.ColorFunc("black+h")
-	bold    = ansi.ColorFunc("default+b")
+	magenta   = ansi.ColorFunc("magenta")
+	cyan      = ansi.ColorFunc("cyan")
+	red       = ansi.ColorFunc("red")
+	yellow    = ansi.ColorFunc("yellow")
+	blue      = ansi.ColorFunc("blue")
+	green     = ansi.ColorFunc("green")
+	gray      = ansi.ColorFunc("black+h")
+	bold      = ansi.ColorFunc("default+b")
+	underline = ansi.ColorFunc("default+u")
 )
 
 func NewFormatter(enabled bool) *Formatter {
@@ -57,6 +57,17 @@ func (f *Formatter) Bold(t string) string {
 
 func (f *Formatter) Boldf(t string, args ...interface{}) string {
 	return f.Bold(fmt.Sprintf(t, args...))
+}
+
+func (f *Formatter) Underline(t string) string {
+	if !f.enabled {
+		return t
+	}
+	return underline(t)
+}
+
+func (f *Formatter) Underlinef(t string, args ...interface{}) string {
+	return f.Underline(fmt.Sprintf(t, args...))
 }
 
 func (f *Formatter) Red(t string) string {
@@ -168,33 +179,9 @@ func (f *Formatter) FailureIcon() string {
 	return f.Failure("✖")
 }
 
-type ColorFunc func(string) string
-
-func (f *Formatter) ColorFromString(s string) ColorFunc {
-	var fn ColorFunc
-
-	switch strings.ToLower(s) {
-	case "bold":
-		fn = f.Bold
-	case "red":
-		fn = f.Red
-	case "yellow":
-		fn = f.Yellow
-	case "green":
-		fn = f.Green
-	case "gray":
-		fn = f.Gray
-	case "magenta":
-		fn = f.Magenta
-	case "cyan":
-		fn = f.Cyan
-	case "blue":
-		fn = f.Blue
-	default:
-		fn = func(s string) string {
-			return s
-		}
+func (f *Formatter) Color(s string, style string) string {
+	if !f.enabled {
+		return s
 	}
-
-	return fn
+	return ansi.Color(s, style)
 }
