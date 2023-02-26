@@ -39,8 +39,7 @@ func TestIOStreamImplementations(t *testing.T) {
 func TestIOStreams_Formatter(t *testing.T) {
 	ios := Test()
 	formatter := ios.Formatter()
-	f := formatter.ColorFromString("green")
-	assert.Equal(t, "foo", f("foo"))
+	assert.Equal(t, "foo", formatter.Color("foo", "green"))
 }
 
 func TestIOStreams_ProgressIndicator(t *testing.T) {
