@@ -51,7 +51,7 @@ func NewIOStreams() *IOStreams {
 	}
 	stdoutIsTTY := ios.IsStdoutTTY()
 	stderrIsTTY := ios.IsStderrTTY()
-	ios.SetColorEnabled(ioutil.EnvColorForced() || (stdoutIsTTY && !ioutil.EnvColorDisabled()))
+	ios.SetColorEnabled(EnvColorForced() || (stdoutIsTTY && !EnvColorDisabled()))
 	ios.SetProgressIndicatorEnabled(stdoutIsTTY && stderrIsTTY)
 	ios.SetStdoutTTY(stdoutIsTTY)
 	ios.SetStderrTTY(stdoutIsTTY)
