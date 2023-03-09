@@ -25,7 +25,6 @@ package main
 import (
     "github.com/twelvelabs/termite/api"
     "github.com/twelvelabs/termite/conf"
-    "github.com/twelvelabs/termite/ioutil"
     "github.com/twelvelabs/termite/ui"
 )
 
@@ -37,11 +36,6 @@ func main() {
 
     // Loads and validates config values from ~/.config/my-app/config.yaml
     config, _ := conf.NewLoader(&Config{}, ConfigFile("my-app")).Load()
-
-    ios := ioutil.System()
-    messenger := ui.NewMessenger(ios)
-    prompter := ui.NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
-
     client := api.NewRESTClient(&api.ClientOptions{
         BaseURL: config.BaseURL,
     })
@@ -50,19 +44,20 @@ func main() {
         Status string `json:"statusMessage"`
     }
 
-    ok, _ := prompter.Confirm("Proceed?", true, "Some help text...")
+    u := ui.NewUserInterface(ui.NewIOStreams())
+    ok, _ := u.Confirm("Proceed?", true, "Some help text...")
     if ok {
-        ios.StartProgressIndicator("Requesting")
+        u.ProgressIndicator.Start("Requesting")
         resp := &APIResponse{}
         err := client.Get("/some/endpoint", resp)
         if err != nil {
-            messenger.Failure("API failure: %v", err)
+            u.Out(u.FailureIcon() + " API failure: %v\n", err)
         } else {
-            messenger.Info("API success: %v", resp.Status)
+            u.Out(u.InfoIcon() + " API success: %v\n", resp.Status)
         }
-        ios.StopProgressIndicator()
+        u.ProgressIndicator.Stop()
     }
-    messenger.Success("Done")
+    u.Out(u.SuccessIcon() + " Done\n")
 }
 ```
 

@@ -1,4 +1,4 @@
-package ioutil
+package ui
 
 /*
 This file started out as a copy of https://github.com/cli/cli/blob/trunk/pkg/iostreams/iostreams.go
@@ -24,10 +24,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
-	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/mattn/go-isatty" // cspell: disable-line
 )
 
@@ -38,6 +35,35 @@ type IOStream interface {
 	Fd() uintptr
 	String() string
 	Lines() []string
+}
+
+// NewIOStreams returns the default IOStreams containing os.Stdin, os.Stdout, and os.Stderr.
+func NewIOStreams() *IOStreams {
+	ios := &IOStreams{
+		In:  &systemIOStream{File: os.Stdin},
+		Out: &systemIOStream{File: os.Stdout},
+		Err: &systemIOStream{File: os.Stderr},
+	}
+	stdoutIsTTY := ios.IsStdoutTTY()
+	stderrIsTTY := ios.IsStderrTTY()
+	ios.SetColorEnabled(EnvColorForced() || (stdoutIsTTY && !EnvColorDisabled()))
+	ios.SetStdoutTTY(stdoutIsTTY)
+	ios.SetStderrTTY(stderrIsTTY)
+	return ios
+}
+
+// NewTestIOStreams returns an IOStreams with mock in/out/err values for testing.
+func NewTestIOStreams() *IOStreams {
+	ios := &IOStreams{
+		In:  &mockIOStream{Buffer: &bytes.Buffer{}, fd: 0},
+		Out: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 1},
+		Err: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 2},
+	}
+	ios.SetColorEnabled(false)
+	ios.SetStdinTTY(false)
+	ios.SetStdoutTTY(false)
+	ios.SetStderrTTY(false)
+	return ios
 }
 
 // Container for the three main CLI I/O streams.
@@ -53,10 +79,6 @@ type IOStreams struct {
 
 	isInteractiveOverride bool
 	isInteractive         bool
-
-	progressIndicatorEnabled bool
-	progressIndicator        *spinner.Spinner
-	progressIndicatorMu      sync.Mutex
 
 	stdinTTYOverride  bool
 	stdinIsTTY        bool
@@ -79,6 +101,16 @@ func (s *IOStreams) SetColorEnabled(v bool) {
 // Formatter returns a ANSI string formatter.
 func (s *IOStreams) Formatter() *Formatter {
 	return NewFormatter(s.IsColorEnabled())
+}
+
+// ProgressIndicator returns a new progress indicator.
+func (s *IOStreams) ProgressIndicator() *ProgressIndicator {
+	return NewProgressIndicator(s)
+}
+
+// Prompter returns the default, [survey] based prompter.
+func (s *IOStreams) Prompter() *SurveyPrompter {
+	return NewSurveyPrompter(s)
 }
 
 // SetStdinTTY explicitly flags [IOStreams.In] as a TTY.
@@ -139,92 +171,9 @@ func (s *IOStreams) SetInteractive(v bool) {
 	s.isInteractive = v
 }
 
-// ProgressIndicatorEnabled returns true if the progress indicator is enabled.
-func (s *IOStreams) ProgressIndicatorEnabled() bool {
-	return s.progressIndicatorEnabled
-}
-
-// SetProgressIndicatorEnabled sets whether the progress indicator is enabled.
-func (s *IOStreams) SetProgressIndicatorEnabled(v bool) {
-	s.progressIndicatorEnabled = v
-}
-
-func (s *IOStreams) StartProgressIndicator() {
-	s.StartProgressIndicatorWithLabel("")
-}
-
-func (s *IOStreams) StartProgressIndicatorWithLabel(label string) {
-	if !s.progressIndicatorEnabled {
-		return
-	}
-
-	s.progressIndicatorMu.Lock()
-	defer s.progressIndicatorMu.Unlock()
-
-	if s.progressIndicator != nil {
-		if label == "" {
-			s.progressIndicator.Prefix = ""
-		} else {
-			s.progressIndicator.Prefix = label + " "
-		}
-		return
-	}
-
-	// https://github.com/briandowns/spinner#available-character-sets
-	dotStyle := spinner.CharSets[11]
-	sp := spinner.New(dotStyle, 120*time.Millisecond, spinner.WithWriter(s.Err), spinner.WithColor("fgCyan"))
-	if label != "" {
-		sp.Prefix = label + " "
-	}
-
-	sp.Start()
-	s.progressIndicator = sp
-}
-
-func (s *IOStreams) StopProgressIndicator() {
-	s.progressIndicatorMu.Lock()
-	defer s.progressIndicatorMu.Unlock()
-	if s.progressIndicator == nil {
-		return
-	}
-	s.progressIndicator.Stop()
-	s.progressIndicator = nil
-}
-
 // IsTerminal returns true if the stream is a terminal.
 func IsTerminal(stream IOStream) bool {
 	return isatty.IsTerminal(stream.Fd()) || isatty.IsCygwinTerminal(stream.Fd())
-}
-
-// Returns an IOStreams containing os.Stdin, os.Stdout, and os.Stderr.
-func System() *IOStreams {
-	ios := &IOStreams{
-		In:  &systemIOStream{File: os.Stdin},
-		Out: &systemIOStream{File: os.Stdout},
-		Err: &systemIOStream{File: os.Stderr},
-	}
-	stdoutIsTTY := ios.IsStdoutTTY()
-	stderrIsTTY := ios.IsStderrTTY()
-	ios.SetColorEnabled(EnvColorForced() || (stdoutIsTTY && !EnvColorDisabled()))
-	ios.SetProgressIndicatorEnabled(stdoutIsTTY && stderrIsTTY)
-	ios.SetStdoutTTY(stdoutIsTTY)
-	ios.SetStderrTTY(stdoutIsTTY)
-	return ios
-}
-
-// Returns an IOStreams with mock in/out/err values.
-func Test() *IOStreams {
-	ios := &IOStreams{
-		In:  &mockIOStream{Buffer: &bytes.Buffer{}, fd: 0},
-		Out: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 1},
-		Err: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 2},
-	}
-	ios.SetColorEnabled(false)
-	ios.SetProgressIndicatorEnabled(false)
-	ios.SetStdinTTY(false)
-	ios.SetStdoutTTY(false)
-	ios.SetStderrTTY(false)
-	return ios
 }
 
 var (
