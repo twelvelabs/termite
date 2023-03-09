@@ -88,7 +88,7 @@ func (ui *UserInterface) VerifyStubs(t testable) {
 // WithStubbing configures stubbing and returns the receiver.
 func (ui *UserInterface) WithStubbing() *UserInterface {
 	if !ui.IsStubbed() {
-		ui.Prompter = NewStubPrompter()
+		ui.Prompter = NewStubPrompter(ui.ios)
 	}
 	return ui
 }

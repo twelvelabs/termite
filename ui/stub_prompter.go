@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 )
 
@@ -12,14 +13,16 @@ type Stub struct {
 	Responder Responder
 }
 
-func NewStubPrompter() *StubPrompter {
+func NewStubPrompter(ios *IOStreams) *StubPrompter {
 	return &StubPrompter{
+		ios:   ios,
 		stubs: []*Stub{},
 	}
 }
 
 // StubPrompter is an implementation of Prompter that invokes stubbed prompts.
 type StubPrompter struct {
+	ios   *IOStreams
 	mu    sync.Mutex
 	stubs []*Stub
 }
@@ -42,7 +45,13 @@ func (sp *StubPrompter) Confirm(msg string, value bool, help string) (bool, erro
 	if err != nil {
 		return false, err
 	}
-	return response.(bool), nil
+	casted := response.(bool)
+	formatted := "No"
+	if casted {
+		formatted = "Yes"
+	}
+	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, formatted)
+	return casted, nil
 }
 
 // Input prompts for single string value.
@@ -59,7 +68,9 @@ func (sp *StubPrompter) Input(msg string, value string, help string) (string, er
 	if err != nil {
 		return "", err
 	}
-	return response.(string), nil
+	casted := response.(string)
+	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, casted)
+	return casted, nil
 }
 
 // MultiSelect prompts for a slice of string values w/ a fixed set of options.
@@ -76,7 +87,9 @@ func (sp *StubPrompter) MultiSelect(msg string, options []string, values []strin
 	if err != nil {
 		return nil, err
 	}
-	return response.([]string), nil
+	casted := response.([]string)
+	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, strings.Join(casted, ", "))
+	return casted, nil
 }
 
 // Select prompts for single string value w/ a fixed set of options.
@@ -93,6 +106,8 @@ func (sp *StubPrompter) Select(msg string, options []string, value string, help 
 	if err != nil {
 		return "", err
 	}
+	casted := response.(string)
+	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, casted)
 	return response.(string), nil
 }
 

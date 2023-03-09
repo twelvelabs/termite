@@ -9,7 +9,8 @@ import (
 )
 
 func TestStubPrompter_Confirm(t *testing.T) {
-	prompter := NewStubPrompter()
+	ios := NewTestIOStreams()
+	prompter := NewStubPrompter(ios)
 
 	_, err := prompter.Confirm("Proceed?", false, "")
 	assert.ErrorContains(t, err, "no registered stubs matching")
@@ -33,10 +34,15 @@ func TestStubPrompter_Confirm(t *testing.T) {
 
 	_, err = prompter.Confirm("Proceed?", false, "")
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+
+	assert.Equal(t, []string{
+		"? Proceed? Yes",
+	}, ios.Out.Lines())
 }
 
 func TestStubPrompter_Input(t *testing.T) {
-	prompter := NewStubPrompter()
+	ios := NewTestIOStreams()
+	prompter := NewStubPrompter(ios)
 
 	_, err := prompter.Input("Name:", "", "")
 	assert.ErrorContains(t, err, "no registered stubs matching")
@@ -60,10 +66,15 @@ func TestStubPrompter_Input(t *testing.T) {
 
 	_, err = prompter.Input("Name:", "", "")
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+
+	assert.Equal(t, []string{
+		"? Name: foo",
+	}, ios.Out.Lines())
 }
 
 func TestStubPrompter_MultiSelect(t *testing.T) {
-	prompter := NewStubPrompter()
+	ios := NewTestIOStreams()
+	prompter := NewStubPrompter(ios)
 
 	_, err := prompter.MultiSelect("Colors:", nil, nil, "")
 	assert.ErrorContains(t, err, "no registered stubs matching")
@@ -87,10 +98,15 @@ func TestStubPrompter_MultiSelect(t *testing.T) {
 
 	_, err = prompter.MultiSelect("Colors:", nil, nil, "")
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+
+	assert.Equal(t, []string{
+		"? Colors: red, yellow, blue",
+	}, ios.Out.Lines())
 }
 
 func TestStubPrompter_Select(t *testing.T) {
-	prompter := NewStubPrompter()
+	ios := NewTestIOStreams()
+	prompter := NewStubPrompter(ios)
 
 	_, err := prompter.Select("Country:", nil, "", "")
 	assert.ErrorContains(t, err, "no registered stubs matching")
@@ -114,11 +130,15 @@ func TestStubPrompter_Select(t *testing.T) {
 
 	_, err = prompter.Select("Country:", nil, "", "")
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+
+	assert.Equal(t, []string{
+		"? Country: US",
+	}, ios.Out.Lines())
 }
 
 func TestStubPrompter_VerifyWhenNoStubs(t *testing.T) {
 	mt := &mockTest{}
-	prompter := NewStubPrompter()
+	prompter := NewStubPrompter(NewTestIOStreams())
 
 	prompter.VerifyStubs(mt)
 	assert.Equal(t, true, mt.HelperCalled)
@@ -127,7 +147,7 @@ func TestStubPrompter_VerifyWhenNoStubs(t *testing.T) {
 
 func TestStubPrompter_VerifyWhenAllStubsMatched(t *testing.T) {
 	mt := &mockTest{}
-	prompter := NewStubPrompter()
+	prompter := NewStubPrompter(NewTestIOStreams())
 	prompter.RegisterStub(
 		MatchConfirm("Proceed?"),
 		RespondBool(true),
@@ -143,7 +163,7 @@ func TestStubPrompter_VerifyWhenAllStubsMatched(t *testing.T) {
 
 func TestStubPrompter_VerifyWhenUnmatchedStubs(t *testing.T) {
 	mt := &mockTest{}
-	prompter := NewStubPrompter()
+	prompter := NewStubPrompter(NewTestIOStreams())
 	prompter.RegisterStub(
 		MatchConfirm("Proceed?"),
 		RespondBool(true),
