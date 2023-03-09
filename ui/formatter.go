@@ -1,4 +1,4 @@
-package ioutil
+package ui
 
 /*
 This file started out as a copy of https://github.com/cli/cli/blob/trunk/pkg/iostreams/color.go

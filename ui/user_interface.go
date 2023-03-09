@@ -2,23 +2,21 @@ package ui
 
 import (
 	"fmt"
-
-	"github.com/twelvelabs/termite/ioutil"
 )
 
 // NewUserInterface returns a new UserInterface.
 func NewUserInterface(ios *IOStreams) *UserInterface {
 	return &UserInterface{
+		ios:       ios,
 		Formatter: ios.Formatter(),
 		Prompter:  NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios),
-		ios:       ios,
 	}
 }
 
 // UserInterface is a high level abstraction for rendering terminal UIs.
 // It supports stubbing interactive prompts and rendering formatted text to os.Stdout.
 type UserInterface struct {
-	*ioutil.Formatter
+	*Formatter
 
 	Prompter Prompter
 

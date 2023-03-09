@@ -29,8 +29,6 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/mattn/go-isatty" // cspell: disable-line
-
-	"github.com/twelvelabs/termite/ioutil"
 )
 
 // IOStream represents an input or output stream.
@@ -110,8 +108,8 @@ func (s *IOStreams) SetColorEnabled(v bool) {
 }
 
 // Formatter returns a ANSI string formatter.
-func (s *IOStreams) Formatter() *ioutil.Formatter {
-	return ioutil.NewFormatter(s.IsColorEnabled())
+func (s *IOStreams) Formatter() *Formatter {
+	return NewFormatter(s.IsColorEnabled())
 }
 
 // SetStdinTTY explicitly flags [IOStreams.In] as a TTY.
