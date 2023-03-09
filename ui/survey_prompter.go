@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2" // spell: disable-line
@@ -17,35 +16,15 @@ var (
 	_ survey.Transformer = trimSpace
 )
 
-type fileReader interface {
-	io.Reader
-	Fd() uintptr
-}
-
-type fileWriter interface {
-	io.Writer
-	Fd() uintptr
-}
-
-type session interface {
-	IsInteractive() bool
-}
-
-func NewSurveyPrompter(in fileReader, out fileWriter, err fileWriter, s session) *SurveyPrompter {
+func NewSurveyPrompter(ios *IOStreams) *SurveyPrompter {
 	return &SurveyPrompter{
-		stdin:   in,
-		stdout:  out,
-		stderr:  err,
-		session: s,
+		ios: ios,
 	}
 }
 
 // SurveyPrompter is a light wrapper around the [survey](https://github.com/go-survey/survey) library.
 type SurveyPrompter struct {
-	stdin   fileReader
-	stdout  fileWriter
-	stderr  fileWriter
-	session session
+	ios *IOStreams
 }
 
 // Confirm prompts for a boolean yes/no value.
@@ -99,7 +78,7 @@ func (p *SurveyPrompter) Select(
 }
 
 func (p *SurveyPrompter) ask(q survey.Prompt, response interface{}) error {
-	if !p.session.IsInteractive() {
+	if !p.ios.IsInteractive() {
 		return nil
 	}
 	// survey.AskOne() doesn't allow passing in a transform func,
@@ -110,7 +89,7 @@ func (p *SurveyPrompter) ask(q survey.Prompt, response interface{}) error {
 			Transform: trimSpace,
 		},
 	}
-	err := surveyAsk(qs, response, survey.WithStdio(p.stdin, p.stdout, p.stderr))
+	err := surveyAsk(qs, response, survey.WithStdio(p.ios.In, p.ios.Out, p.ios.Err))
 	if err == nil {
 		return nil
 	}

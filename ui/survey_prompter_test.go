@@ -10,8 +10,7 @@ import (
 
 func TestNewSurveyPrompter(t *testing.T) {
 	ios := NewTestIOStreams()
-
-	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
+	sp := NewSurveyPrompter(ios)
 	assert.IsType(t, &SurveyPrompter{}, sp)
 }
 
@@ -20,7 +19,7 @@ func TestSurveyPrompter_Confirm(t *testing.T) {
 	defer stubs.Reset()
 
 	ios := NewTestIOStreams()
-	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
+	sp := NewSurveyPrompter(ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
 	ios.SetInteractive(false)
@@ -46,7 +45,7 @@ func TestSurveyPrompter_Input(t *testing.T) {
 	defer stubs.Reset()
 
 	ios := NewTestIOStreams()
-	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
+	sp := NewSurveyPrompter(ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
 	ios.SetInteractive(false)
@@ -65,7 +64,7 @@ func TestSurveyPrompter_MultiSelect(t *testing.T) {
 	defer stubs.Reset()
 
 	ios := NewTestIOStreams()
-	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
+	sp := NewSurveyPrompter(ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
 	ios.SetInteractive(false)
@@ -84,7 +83,7 @@ func TestSurveyPrompter_Select(t *testing.T) {
 	defer stubs.Reset()
 
 	ios := NewTestIOStreams()
-	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
+	sp := NewSurveyPrompter(ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
 	ios.SetInteractive(false)
