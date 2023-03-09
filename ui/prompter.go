@@ -1,7 +1,5 @@
 package ui
 
-//go:generate moq --out=prompter_mock.go . Prompter
-
 // Prompter is an interface for types that prompt for user input.
 type Prompter interface {
 	// Confirm prompts for a boolean yes/no value.
@@ -12,9 +10,4 @@ type Prompter interface {
 	MultiSelect(msg string, options []string, values []string, help string) ([]string, error)
 	// Select prompts for single string value w/ a fixed set of options.
 	Select(msg string, options []string, value string, help string) (string, error)
-}
-
-// NewPrompterMock returns a new mock prompter.
-func NewPrompterMock() *PrompterMock {
-	return &PrompterMock{}
 }

@@ -5,6 +5,7 @@
         "ui.semanticTokens": true
     },
     "cSpell.words": [
+        "CLICOLOR",
         "codecov",
         "golangci",
         "GOPROXY",
