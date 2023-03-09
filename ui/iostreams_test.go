@@ -42,29 +42,6 @@ func TestIOStreams_Formatter(t *testing.T) {
 	assert.Equal(t, "foo", formatter.Color("foo", "green"))
 }
 
-func TestIOStreams_ProgressIndicator(t *testing.T) {
-	ios := NewTestIOStreams()
-
-	assert.Equal(t, false, ios.ProgressIndicatorEnabled())
-	ios.StartProgressIndicator()
-	ios.StopProgressIndicator()
-
-	assert.Equal(t, "", ios.Err.String())
-
-	ios.SetProgressIndicatorEnabled(true)
-	assert.Equal(t, true, ios.ProgressIndicatorEnabled())
-	ios.StartProgressIndicator()
-	ios.StartProgressIndicatorWithLabel("running")
-	ios.StartProgressIndicatorWithLabel("")
-	ios.StopProgressIndicator()
-	ios.StartProgressIndicatorWithLabel("updating")
-	ios.StopProgressIndicator()
-
-	// The spinner library does isTTY checks internally, so we can't get output.
-	// Doing the above solely for the coverage stats :money:.
-	assert.Equal(t, "", ios.Err.String())
-}
-
 func TestIOStreams_TTYMethods(t *testing.T) {
 	ios := NewIOStreams()
 	// IsTerminal returns false when running tests

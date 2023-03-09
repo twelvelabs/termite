@@ -7,9 +7,10 @@ import (
 // NewUserInterface returns a new UserInterface.
 func NewUserInterface(ios *IOStreams) *UserInterface {
 	return &UserInterface{
-		ios:       ios,
-		Formatter: ios.Formatter(),
-		Prompter:  ios.Prompter(),
+		ios:               ios,
+		Formatter:         ios.Formatter(),
+		ProgressIndicator: ios.ProgressIndicator(),
+		Prompter:          ios.Prompter(),
 	}
 }
 
@@ -18,7 +19,8 @@ func NewUserInterface(ios *IOStreams) *UserInterface {
 type UserInterface struct {
 	*Formatter
 
-	Prompter Prompter
+	ProgressIndicator *ProgressIndicator
+	Prompter          Prompter
 
 	ios *IOStreams
 }

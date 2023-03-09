@@ -24,10 +24,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
-	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/mattn/go-isatty" // cspell: disable-line
 )
 
@@ -50,9 +47,8 @@ func NewIOStreams() *IOStreams {
 	stdoutIsTTY := ios.IsStdoutTTY()
 	stderrIsTTY := ios.IsStderrTTY()
 	ios.SetColorEnabled(EnvColorForced() || (stdoutIsTTY && !EnvColorDisabled()))
-	ios.SetProgressIndicatorEnabled(stdoutIsTTY && stderrIsTTY)
 	ios.SetStdoutTTY(stdoutIsTTY)
-	ios.SetStderrTTY(stdoutIsTTY)
+	ios.SetStderrTTY(stderrIsTTY)
 	return ios
 }
 
@@ -64,7 +60,6 @@ func NewTestIOStreams() *IOStreams {
 		Err: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 2},
 	}
 	ios.SetColorEnabled(false)
-	ios.SetProgressIndicatorEnabled(false)
 	ios.SetStdinTTY(false)
 	ios.SetStdoutTTY(false)
 	ios.SetStderrTTY(false)
@@ -84,10 +79,6 @@ type IOStreams struct {
 
 	isInteractiveOverride bool
 	isInteractive         bool
-
-	progressIndicatorEnabled bool
-	progressIndicator        *spinner.Spinner
-	progressIndicatorMu      sync.Mutex
 
 	stdinTTYOverride  bool
 	stdinIsTTY        bool
@@ -110,6 +101,11 @@ func (s *IOStreams) SetColorEnabled(v bool) {
 // Formatter returns a ANSI string formatter.
 func (s *IOStreams) Formatter() *Formatter {
 	return NewFormatter(s.IsColorEnabled())
+}
+
+// ProgressIndicator returns a new progress indicator.
+func (s *IOStreams) ProgressIndicator() *ProgressIndicator {
+	return NewProgressIndicator(s)
 }
 
 // Prompter returns the default, [survey] based prompter.
@@ -173,58 +169,6 @@ func (s *IOStreams) IsInteractive() bool {
 func (s *IOStreams) SetInteractive(v bool) {
 	s.isInteractiveOverride = true
 	s.isInteractive = v
-}
-
-// ProgressIndicatorEnabled returns true if the progress indicator is enabled.
-func (s *IOStreams) ProgressIndicatorEnabled() bool {
-	return s.progressIndicatorEnabled
-}
-
-// SetProgressIndicatorEnabled sets whether the progress indicator is enabled.
-func (s *IOStreams) SetProgressIndicatorEnabled(v bool) {
-	s.progressIndicatorEnabled = v
-}
-
-func (s *IOStreams) StartProgressIndicator() {
-	s.StartProgressIndicatorWithLabel("")
-}
-
-func (s *IOStreams) StartProgressIndicatorWithLabel(label string) {
-	if !s.progressIndicatorEnabled {
-		return
-	}
-
-	s.progressIndicatorMu.Lock()
-	defer s.progressIndicatorMu.Unlock()
-
-	if s.progressIndicator != nil {
-		if label == "" {
-			s.progressIndicator.Prefix = ""
-		} else {
-			s.progressIndicator.Prefix = label + " "
-		}
-		return
-	}
-
-	// https://github.com/briandowns/spinner#available-character-sets
-	dotStyle := spinner.CharSets[11]
-	sp := spinner.New(dotStyle, 120*time.Millisecond, spinner.WithWriter(s.Err), spinner.WithColor("fgCyan"))
-	if label != "" {
-		sp.Prefix = label + " "
-	}
-
-	sp.Start()
-	s.progressIndicator = sp
-}
-
-func (s *IOStreams) StopProgressIndicator() {
-	s.progressIndicatorMu.Lock()
-	defer s.progressIndicatorMu.Unlock()
-	if s.progressIndicator == nil {
-		return
-	}
-	s.progressIndicator.Stop()
-	s.progressIndicator = nil
 }
 
 // IsTerminal returns true if the stream is a terminal.

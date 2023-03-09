@@ -5,8 +5,10 @@
         "ui.semanticTokens": true
     },
     "cSpell.words": [
+        "briandowns",
         "CLICOLOR",
         "codecov",
+        "Cygwin",
         "golangci",
         "GOPROXY",
         "goreleaser",

@@ -47,7 +47,7 @@ func main() {
     u := ui.NewUserInterface(ui.NewIOStreams())
     ok, _ := u.Confirm("Proceed?", true, "Some help text...")
     if ok {
-        u.StartProgressIndicator("Requesting")
+        u.ProgressIndicator.Start("Requesting")
         resp := &APIResponse{}
         err := client.Get("/some/endpoint", resp)
         if err != nil {
@@ -55,7 +55,7 @@ func main() {
         } else {
             u.Out(u.InfoIcon() + " API success: %v\n", resp.Status)
         }
-        u.StopProgressIndicator()
+        u.ProgressIndicator.Stop()
     }
     u.Out(u.SuccessIcon() + " Done\n")
 }
