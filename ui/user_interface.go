@@ -7,7 +7,7 @@ import (
 )
 
 // NewUserInterface returns a new UserInterface.
-func NewUserInterface(ios *ioutil.IOStreams) *UserInterface {
+func NewUserInterface(ios *IOStreams) *UserInterface {
 	return &UserInterface{
 		Formatter: ios.Formatter(),
 		Prompter:  NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios),
@@ -22,7 +22,7 @@ type UserInterface struct {
 
 	Prompter Prompter
 
-	ios *ioutil.IOStreams
+	ios *IOStreams
 }
 
 func (ui *UserInterface) Out(s string, args ...any) {

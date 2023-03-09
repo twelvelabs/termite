@@ -1,4 +1,4 @@
-package ioutil
+package ui
 
 /*
 This file started out as a copy of https://github.com/cli/cli/blob/trunk/pkg/iostreams/iostreams.go
@@ -29,6 +29,8 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/mattn/go-isatty" // cspell: disable-line
+
+	"github.com/twelvelabs/termite/ioutil"
 )
 
 // IOStream represents an input or output stream.
@@ -38,6 +40,37 @@ type IOStream interface {
 	Fd() uintptr
 	String() string
 	Lines() []string
+}
+
+// NewIOStreams returns the default IOStreams containing os.Stdin, os.Stdout, and os.Stderr.
+func NewIOStreams() *IOStreams {
+	ios := &IOStreams{
+		In:  &systemIOStream{File: os.Stdin},
+		Out: &systemIOStream{File: os.Stdout},
+		Err: &systemIOStream{File: os.Stderr},
+	}
+	stdoutIsTTY := ios.IsStdoutTTY()
+	stderrIsTTY := ios.IsStderrTTY()
+	ios.SetColorEnabled(ioutil.EnvColorForced() || (stdoutIsTTY && !ioutil.EnvColorDisabled()))
+	ios.SetProgressIndicatorEnabled(stdoutIsTTY && stderrIsTTY)
+	ios.SetStdoutTTY(stdoutIsTTY)
+	ios.SetStderrTTY(stdoutIsTTY)
+	return ios
+}
+
+// NewTestIOStreams returns an IOStreams with mock in/out/err values for testing.
+func NewTestIOStreams() *IOStreams {
+	ios := &IOStreams{
+		In:  &mockIOStream{Buffer: &bytes.Buffer{}, fd: 0},
+		Out: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 1},
+		Err: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 2},
+	}
+	ios.SetColorEnabled(false)
+	ios.SetProgressIndicatorEnabled(false)
+	ios.SetStdinTTY(false)
+	ios.SetStdoutTTY(false)
+	ios.SetStderrTTY(false)
+	return ios
 }
 
 // Container for the three main CLI I/O streams.
@@ -77,8 +110,8 @@ func (s *IOStreams) SetColorEnabled(v bool) {
 }
 
 // Formatter returns a ANSI string formatter.
-func (s *IOStreams) Formatter() *Formatter {
-	return NewFormatter(s.IsColorEnabled())
+func (s *IOStreams) Formatter() *ioutil.Formatter {
+	return ioutil.NewFormatter(s.IsColorEnabled())
 }
 
 // SetStdinTTY explicitly flags [IOStreams.In] as a TTY.
@@ -194,37 +227,6 @@ func (s *IOStreams) StopProgressIndicator() {
 // IsTerminal returns true if the stream is a terminal.
 func IsTerminal(stream IOStream) bool {
 	return isatty.IsTerminal(stream.Fd()) || isatty.IsCygwinTerminal(stream.Fd())
-}
-
-// Returns an IOStreams containing os.Stdin, os.Stdout, and os.Stderr.
-func System() *IOStreams {
-	ios := &IOStreams{
-		In:  &systemIOStream{File: os.Stdin},
-		Out: &systemIOStream{File: os.Stdout},
-		Err: &systemIOStream{File: os.Stderr},
-	}
-	stdoutIsTTY := ios.IsStdoutTTY()
-	stderrIsTTY := ios.IsStderrTTY()
-	ios.SetColorEnabled(EnvColorForced() || (stdoutIsTTY && !EnvColorDisabled()))
-	ios.SetProgressIndicatorEnabled(stdoutIsTTY && stderrIsTTY)
-	ios.SetStdoutTTY(stdoutIsTTY)
-	ios.SetStderrTTY(stdoutIsTTY)
-	return ios
-}
-
-// Returns an IOStreams with mock in/out/err values.
-func Test() *IOStreams {
-	ios := &IOStreams{
-		In:  &mockIOStream{Buffer: &bytes.Buffer{}, fd: 0},
-		Out: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 1},
-		Err: &mockIOStream{Buffer: &bytes.Buffer{}, fd: 2},
-	}
-	ios.SetColorEnabled(false)
-	ios.SetProgressIndicatorEnabled(false)
-	ios.SetStdinTTY(false)
-	ios.SetStdoutTTY(false)
-	ios.SetStderrTTY(false)
-	return ios
 }
 
 var (

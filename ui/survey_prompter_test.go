@@ -6,12 +6,10 @@ import (
 
 	"github.com/prashantv/gostub" // spell: disable-line
 	"github.com/stretchr/testify/assert"
-
-	"github.com/twelvelabs/termite/ioutil"
 )
 
 func TestNewSurveyPrompter(t *testing.T) {
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 
 	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 	assert.IsType(t, &SurveyPrompter{}, sp)
@@ -21,7 +19,7 @@ func TestSurveyPrompter_Confirm(t *testing.T) {
 	stubs := gostub.StubFunc(&surveyAsk, errors.New("boom"))
 	defer stubs.Reset()
 
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
@@ -47,7 +45,7 @@ func TestSurveyPrompter_Input(t *testing.T) {
 	stubs := gostub.StubFunc(&surveyAsk, errors.New("boom"))
 	defer stubs.Reset()
 
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
@@ -66,7 +64,7 @@ func TestSurveyPrompter_MultiSelect(t *testing.T) {
 	stubs := gostub.StubFunc(&surveyAsk, errors.New("boom"))
 	defer stubs.Reset()
 
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.
@@ -85,7 +83,7 @@ func TestSurveyPrompter_Select(t *testing.T) {
 	stubs := gostub.StubFunc(&surveyAsk, errors.New("boom"))
 	defer stubs.Reset()
 
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 	sp := NewSurveyPrompter(ios.In, ios.Out, ios.Err, ios)
 
 	// Non-interactive sessions should not prompt - just return the default value.

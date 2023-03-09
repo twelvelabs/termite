@@ -1,4 +1,4 @@
-package ioutil
+package ui
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestSystem(t *testing.T) {
-	ios := System()
+	ios := NewIOStreams()
 	assert.NotNil(t, ios.In)
 	assert.NotNil(t, ios.Out)
 	assert.NotNil(t, ios.Err)
@@ -37,13 +37,13 @@ func TestIOStreamImplementations(t *testing.T) {
 }
 
 func TestIOStreams_Formatter(t *testing.T) {
-	ios := Test()
+	ios := NewTestIOStreams()
 	formatter := ios.Formatter()
 	assert.Equal(t, "foo", formatter.Color("foo", "green"))
 }
 
 func TestIOStreams_ProgressIndicator(t *testing.T) {
-	ios := Test()
+	ios := NewTestIOStreams()
 
 	assert.Equal(t, false, ios.ProgressIndicatorEnabled())
 	ios.StartProgressIndicator()
@@ -66,7 +66,7 @@ func TestIOStreams_ProgressIndicator(t *testing.T) {
 }
 
 func TestIOStreams_TTYMethods(t *testing.T) {
-	ios := System()
+	ios := NewIOStreams()
 	// IsTerminal returns false when running tests
 	assert.Equal(t, false, ios.IsStdinTTY())
 	assert.Equal(t, false, ios.IsStdoutTTY())

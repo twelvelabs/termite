@@ -4,17 +4,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/twelvelabs/termite/ioutil"
 )
 
 func TestNewUserInterface(t *testing.T) {
-	ui := NewUserInterface(ioutil.Test())
+	ui := NewUserInterface(NewTestIOStreams())
 	assert.IsType(t, &UserInterface{}, ui)
 }
 
 func TestUserInterface_Out(t *testing.T) {
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 	ui := NewUserInterface(ios)
 
 	ui.Out("Hello\n")
@@ -27,7 +25,7 @@ func TestUserInterface_Out(t *testing.T) {
 }
 
 func TestUserInterface_Err(t *testing.T) {
-	ios := ioutil.Test()
+	ios := NewTestIOStreams()
 	ui := NewUserInterface(ios)
 
 	ui.Err("Hello\n")
@@ -41,7 +39,7 @@ func TestUserInterface_Err(t *testing.T) {
 
 func TestUserInterface_StubbingMethods(t *testing.T) {
 	// Stubbing not yet enabled
-	ui := NewUserInterface(ioutil.Test())
+	ui := NewUserInterface(NewTestIOStreams())
 	assert.Equal(t, false, ui.IsStubbed())
 	assert.IsType(t, &SurveyPrompter{}, ui.Prompter)
 	assert.Panics(t, func() {
@@ -52,13 +50,13 @@ func TestUserInterface_StubbingMethods(t *testing.T) {
 	})
 
 	// Stubbing enabled
-	ui = NewUserInterface(ioutil.Test()).WithStubbing()
+	ui = NewUserInterface(NewTestIOStreams()).WithStubbing()
 	assert.Equal(t, true, ui.IsStubbed())
 	assert.IsType(t, &StubPrompter{}, ui.Prompter)
 }
 
 func TestUserInterface_Confirm(t *testing.T) {
-	ui := NewUserInterface(ioutil.Test()).WithStubbing()
+	ui := NewUserInterface(NewTestIOStreams()).WithStubbing()
 	ui.RegisterStub(MatchConfirm("Perform?"), RespondBool(true))
 	defer ui.VerifyStubs(t)
 
@@ -68,7 +66,7 @@ func TestUserInterface_Confirm(t *testing.T) {
 }
 
 func TestUserInterface_Input(t *testing.T) {
-	ui := NewUserInterface(ioutil.Test()).WithStubbing()
+	ui := NewUserInterface(NewTestIOStreams()).WithStubbing()
 	ui.RegisterStub(MatchInput("Name:"), RespondString("foo"))
 	defer ui.VerifyStubs(t)
 
@@ -78,7 +76,7 @@ func TestUserInterface_Input(t *testing.T) {
 }
 
 func TestUserInterface_MultiSelect(t *testing.T) {
-	ui := NewUserInterface(ioutil.Test()).WithStubbing()
+	ui := NewUserInterface(NewTestIOStreams()).WithStubbing()
 	ui.RegisterStub(MatchMultiSelect("Color:"), RespondStringSlice([]string{"red"}))
 	defer ui.VerifyStubs(t)
 
@@ -88,7 +86,7 @@ func TestUserInterface_MultiSelect(t *testing.T) {
 }
 
 func TestUserInterface_Select(t *testing.T) {
-	ui := NewUserInterface(ioutil.Test()).WithStubbing()
+	ui := NewUserInterface(NewTestIOStreams()).WithStubbing()
 	ui.RegisterStub(MatchSelect("Country:"), RespondString("US"))
 	defer ui.VerifyStubs(t)
 
