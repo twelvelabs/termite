@@ -13,6 +13,32 @@ func TestNewUserInterface(t *testing.T) {
 	assert.IsType(t, &UserInterface{}, ui)
 }
 
+func TestUserInterface_Out(t *testing.T) {
+	ios := ioutil.Test()
+	ui := NewUserInterface(ios)
+
+	ui.Out("Hello\n")
+	ui.Out("Hello %s\n", "World")
+
+	assert.Equal(t, []string{
+		"Hello",
+		"Hello World",
+	}, ios.Out.Lines())
+}
+
+func TestUserInterface_Err(t *testing.T) {
+	ios := ioutil.Test()
+	ui := NewUserInterface(ios)
+
+	ui.Err("Hello\n")
+	ui.Err("Hello %s\n", "World")
+
+	assert.Equal(t, []string{
+		"Hello",
+		"Hello World",
+	}, ios.Err.Lines())
+}
+
 func TestUserInterface_StubbingMethods(t *testing.T) {
 	// Stubbing not yet enabled
 	ui := NewUserInterface(ioutil.Test())
