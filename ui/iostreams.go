@@ -112,6 +112,11 @@ func (s *IOStreams) Formatter() *Formatter {
 	return NewFormatter(s.IsColorEnabled())
 }
 
+// Prompter returns the default, [survey] based prompter.
+func (s *IOStreams) Prompter() *SurveyPrompter {
+	return NewSurveyPrompter(s)
+}
+
 // SetStdinTTY explicitly flags [IOStreams.In] as a TTY.
 func (s *IOStreams) SetStdinTTY(isTTY bool) {
 	s.stdinTTYOverride = true

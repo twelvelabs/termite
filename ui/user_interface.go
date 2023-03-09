@@ -8,8 +8,8 @@ import (
 func NewUserInterface(ios *IOStreams) *UserInterface {
 	return &UserInterface{
 		ios:       ios,
-		Formatter: NewFormatter(ios.IsColorEnabled()),
-		Prompter:  NewSurveyPrompter(ios),
+		Formatter: ios.Formatter(),
+		Prompter:  ios.Prompter(),
 	}
 }
 
