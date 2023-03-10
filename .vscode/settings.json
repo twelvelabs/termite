@@ -19,6 +19,7 @@
         "ioutil",
         "ireturn",
         "isatty",
+        "kebabcase",
         "nolint",
         "oneof",
         "ordinalize",
