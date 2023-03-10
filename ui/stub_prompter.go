@@ -32,7 +32,7 @@ var (
 )
 
 // Confirm prompts for a boolean yes/no value.
-func (sp *StubPrompter) Confirm(msg string, value bool, help string) (bool, error) {
+func (sp *StubPrompter) Confirm(msg string, value bool, opts ...PromptOpt) (bool, error) {
 	prompt := Prompt{
 		Type:    PromptTypeConfirm,
 		Message: msg,
@@ -55,7 +55,7 @@ func (sp *StubPrompter) Confirm(msg string, value bool, help string) (bool, erro
 }
 
 // Input prompts for single string value.
-func (sp *StubPrompter) Input(msg string, value string, help string) (string, error) {
+func (sp *StubPrompter) Input(msg string, value string, opts ...PromptOpt) (string, error) {
 	prompt := Prompt{
 		Type:    PromptTypeInput,
 		Message: msg,
@@ -74,7 +74,7 @@ func (sp *StubPrompter) Input(msg string, value string, help string) (string, er
 }
 
 // MultiSelect prompts for a slice of string values w/ a fixed set of options.
-func (sp *StubPrompter) MultiSelect(msg string, options []string, values []string, help string) ([]string, error) {
+func (sp *StubPrompter) MultiSelect(msg string, options []string, values []string, opts ...PromptOpt) ([]string, error) {
 	prompt := Prompt{
 		Type:    PromptTypeMultiSelect,
 		Message: msg,
@@ -93,7 +93,7 @@ func (sp *StubPrompter) MultiSelect(msg string, options []string, values []strin
 }
 
 // Select prompts for single string value w/ a fixed set of options.
-func (sp *StubPrompter) Select(msg string, options []string, value string, help string) (string, error) {
+func (sp *StubPrompter) Select(msg string, options []string, value string, opts ...PromptOpt) (string, error) {
 	prompt := Prompt{
 		Type:    PromptTypeSelect,
 		Message: msg,

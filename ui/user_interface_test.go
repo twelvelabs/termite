@@ -60,7 +60,7 @@ func TestUserInterface_Confirm(t *testing.T) {
 	ui.RegisterStub(MatchConfirm("Perform?"), RespondBool(true))
 	defer ui.VerifyStubs(t)
 
-	response, err := ui.Confirm("Perform?", false, "")
+	response, err := ui.Confirm("Perform?", false)
 	assert.NoError(t, err)
 	assert.Equal(t, true, response)
 }
@@ -70,7 +70,7 @@ func TestUserInterface_Input(t *testing.T) {
 	ui.RegisterStub(MatchInput("Name:"), RespondString("foo"))
 	defer ui.VerifyStubs(t)
 
-	response, err := ui.Input("Name:", "", "")
+	response, err := ui.Input("Name:", "")
 	assert.NoError(t, err)
 	assert.Equal(t, "foo", response)
 }
@@ -80,7 +80,7 @@ func TestUserInterface_MultiSelect(t *testing.T) {
 	ui.RegisterStub(MatchMultiSelect("Color:"), RespondStringSlice([]string{"red"}))
 	defer ui.VerifyStubs(t)
 
-	response, err := ui.MultiSelect("Color:", nil, nil, "")
+	response, err := ui.MultiSelect("Color:", nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"red"}, response)
 }
@@ -90,7 +90,7 @@ func TestUserInterface_Select(t *testing.T) {
 	ui.RegisterStub(MatchSelect("Country:"), RespondString("US"))
 	defer ui.VerifyStubs(t)
 
-	response, err := ui.Select("Country:", nil, "", "")
+	response, err := ui.Select("Country:", nil, "")
 	assert.NoError(t, err)
 	assert.Equal(t, "US", response)
 }
