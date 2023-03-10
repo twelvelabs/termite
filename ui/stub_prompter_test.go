@@ -12,7 +12,7 @@ func TestStubPrompter_Confirm(t *testing.T) {
 	ios := NewTestIOStreams()
 	prompter := NewStubPrompter(ios)
 
-	_, err := prompter.Confirm("Proceed?", false, "")
+	_, err := prompter.Confirm("Proceed?", false)
 	assert.ErrorContains(t, err, "no registered stubs matching")
 
 	prompter.RegisterStub(
@@ -24,15 +24,15 @@ func TestStubPrompter_Confirm(t *testing.T) {
 		RespondError(errors.New("boom")),
 	)
 
-	response, err := prompter.Confirm("Proceed?", false, "")
+	response, err := prompter.Confirm("Proceed?", false)
 	assert.NoError(t, err)
 	assert.Equal(t, true, response)
 
-	response, err = prompter.Confirm("Proceed?", false, "")
+	response, err = prompter.Confirm("Proceed?", false)
 	assert.ErrorContains(t, err, "boom")
 	assert.Equal(t, false, response)
 
-	_, err = prompter.Confirm("Proceed?", false, "")
+	_, err = prompter.Confirm("Proceed?", false)
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
 
 	assert.Equal(t, []string{
@@ -44,7 +44,7 @@ func TestStubPrompter_Input(t *testing.T) {
 	ios := NewTestIOStreams()
 	prompter := NewStubPrompter(ios)
 
-	_, err := prompter.Input("Name:", "", "")
+	_, err := prompter.Input("Name:", "")
 	assert.ErrorContains(t, err, "no registered stubs matching")
 
 	prompter.RegisterStub(
@@ -56,15 +56,15 @@ func TestStubPrompter_Input(t *testing.T) {
 		RespondError(errors.New("boom")),
 	)
 
-	response, err := prompter.Input("Name:", "", "")
+	response, err := prompter.Input("Name:", "")
 	assert.NoError(t, err)
 	assert.Equal(t, "foo", response)
 
-	response, err = prompter.Input("Name:", "", "")
+	response, err = prompter.Input("Name:", "")
 	assert.ErrorContains(t, err, "boom")
 	assert.Equal(t, "", response)
 
-	_, err = prompter.Input("Name:", "", "")
+	_, err = prompter.Input("Name:", "")
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
 
 	assert.Equal(t, []string{
@@ -76,7 +76,7 @@ func TestStubPrompter_MultiSelect(t *testing.T) {
 	ios := NewTestIOStreams()
 	prompter := NewStubPrompter(ios)
 
-	_, err := prompter.MultiSelect("Colors:", nil, nil, "")
+	_, err := prompter.MultiSelect("Colors:", nil, nil)
 	assert.ErrorContains(t, err, "no registered stubs matching")
 
 	prompter.RegisterStub(
@@ -88,15 +88,15 @@ func TestStubPrompter_MultiSelect(t *testing.T) {
 		RespondError(errors.New("boom")),
 	)
 
-	response, err := prompter.MultiSelect("Colors:", nil, nil, "")
+	response, err := prompter.MultiSelect("Colors:", nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"red", "yellow", "blue"}, response)
 
-	response, err = prompter.MultiSelect("Colors:", nil, nil, "")
+	response, err = prompter.MultiSelect("Colors:", nil, nil)
 	assert.ErrorContains(t, err, "boom")
 	assert.Nil(t, response)
 
-	_, err = prompter.MultiSelect("Colors:", nil, nil, "")
+	_, err = prompter.MultiSelect("Colors:", nil, nil)
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
 
 	assert.Equal(t, []string{
@@ -108,7 +108,7 @@ func TestStubPrompter_Select(t *testing.T) {
 	ios := NewTestIOStreams()
 	prompter := NewStubPrompter(ios)
 
-	_, err := prompter.Select("Country:", nil, "", "")
+	_, err := prompter.Select("Country:", nil, "")
 	assert.ErrorContains(t, err, "no registered stubs matching")
 
 	prompter.RegisterStub(
@@ -120,15 +120,15 @@ func TestStubPrompter_Select(t *testing.T) {
 		RespondError(errors.New("boom")),
 	)
 
-	response, err := prompter.Select("Country:", nil, "", "")
+	response, err := prompter.Select("Country:", nil, "")
 	assert.NoError(t, err)
 	assert.Equal(t, "US", response)
 
-	response, err = prompter.Select("Country:", nil, "", "")
+	response, err = prompter.Select("Country:", nil, "")
 	assert.ErrorContains(t, err, "boom")
 	assert.Equal(t, "", response)
 
-	_, err = prompter.Select("Country:", nil, "", "")
+	_, err = prompter.Select("Country:", nil, "")
 	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
 
 	assert.Equal(t, []string{
@@ -153,7 +153,7 @@ func TestStubPrompter_VerifyWhenAllStubsMatched(t *testing.T) {
 		RespondBool(true),
 	)
 
-	_, err := prompter.Confirm("Proceed?", false, "")
+	_, err := prompter.Confirm("Proceed?", false)
 	assert.NoError(t, err)
 
 	prompter.VerifyStubs(mt)

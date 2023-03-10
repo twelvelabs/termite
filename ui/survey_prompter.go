@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2" // spell: disable-line
+
+	"github.com/twelvelabs/termite/validate"
 )
 
 var (
@@ -28,59 +30,89 @@ type SurveyPrompter struct {
 }
 
 // Confirm prompts for a boolean yes/no value.
-func (p *SurveyPrompter) Confirm(prompt string, defaultValue bool, help string) (bool, error) {
-	result := defaultValue
+func (p *SurveyPrompter) Confirm(msg string, value bool, opts ...PromptOpt) (bool, error) {
+	params := GetPromptParams(opts...)
+
+	askOpts := []survey.AskOpt{
+		survey.WithValidator(surveyValidator(msg, params.ValidationRules)),
+	}
+
+	result := value
 	err := p.ask(&survey.Confirm{
-		Message: prompt,
-		Help:    help,
-		Default: defaultValue,
-	}, &result)
+		Message: msg,
+		Help:    params.Help,
+		Default: value,
+	}, &result, askOpts...)
+
 	return result, err
 }
 
 // Input prompts for single string value.
-func (p *SurveyPrompter) Input(prompt string, defaultValue string, help string) (string, error) {
-	result := defaultValue
+func (p *SurveyPrompter) Input(msg string, value string, opts ...PromptOpt) (string, error) {
+	params := GetPromptParams(opts...)
+
+	askOpts := []survey.AskOpt{
+		survey.WithValidator(surveyValidator(msg, params.ValidationRules)),
+	}
+
+	result := value
 	err := p.ask(&survey.Input{
-		Message: prompt,
-		Help:    help,
-		Default: defaultValue,
-	}, &result)
+		Message: msg,
+		Help:    params.Help,
+		Default: value,
+	}, &result, askOpts...)
+
 	return result, err
 }
 
 // MultiSelect prompts for a slice of string values w/ a fixed set of options.
 func (p *SurveyPrompter) MultiSelect(
-	prompt string, options []string, defaultValues []string, help string,
+	msg string, options []string, values []string, opts ...PromptOpt,
 ) ([]string, error) {
-	result := defaultValues
+	params := GetPromptParams(opts...)
+
+	askOpts := []survey.AskOpt{
+		survey.WithValidator(surveyValidator(msg, params.ValidationRules)),
+	}
+
+	result := values
 	err := p.ask(&survey.MultiSelect{
-		Message: prompt,
-		Help:    help,
+		Message: msg,
+		Help:    params.Help,
 		Options: options,
-		Default: defaultValues,
-	}, &result)
+		Default: values,
+	}, &result, askOpts...)
+
 	return result, err
 }
 
 // Select prompts for single string value w/ a fixed set of options.
 func (p *SurveyPrompter) Select(
-	prompt string, options []string, defaultValue string, help string,
+	msg string, options []string, value string, opts ...PromptOpt,
 ) (string, error) {
-	result := defaultValue
+	params := GetPromptParams(opts...)
+
+	askOpts := []survey.AskOpt{
+		survey.WithValidator(surveyValidator(msg, params.ValidationRules)),
+	}
+
+	result := value
 	err := p.ask(&survey.Select{
-		Message: prompt,
-		Help:    help,
+		Message: msg,
+		Help:    params.Help,
 		Options: options,
-		Default: defaultValue,
-	}, &result)
+		Default: value,
+	}, &result, askOpts...)
+
 	return result, err
 }
 
-func (p *SurveyPrompter) ask(q survey.Prompt, response interface{}) error {
+func (p *SurveyPrompter) ask(q survey.Prompt, response interface{}, opts ...survey.AskOpt) error {
 	if !p.ios.IsInteractive() {
+		// Do not prompt when non-interactive (the default value will be returned).
 		return nil
 	}
+	opts = append(opts, survey.WithStdio(p.ios.In, p.ios.Out, p.ios.Err))
 	// survey.AskOne() doesn't allow passing in a transform func,
 	// so we need to call survey.Ask().
 	qs := []*survey.Question{
@@ -89,16 +121,26 @@ func (p *SurveyPrompter) ask(q survey.Prompt, response interface{}) error {
 			Transform: trimSpace,
 		},
 	}
-	err := surveyAsk(qs, response, survey.WithStdio(p.ios.In, p.ios.Out, p.ios.Err))
+	err := surveyAsk(qs, response, opts...)
 	if err == nil {
 		return nil
 	}
 	return fmt.Errorf("prompt error: %w", err)
 }
 
+// Similar to `survey.TransformString(strings.TrimSpace)`, but
+// will ignore (and pass through) non-string values.
+// This allows us to use it on all prompts.
 func trimSpace(val any) any {
 	if str, ok := val.(string); ok {
 		return strings.TrimSpace(str)
 	}
 	return val
+}
+
+// Returns a survey.Validator that delegates to value.Validate.
+func surveyValidator(key string, rules string) survey.Validator {
+	return func(val any) error {
+		return validate.KeyVal(key, val, rules)
+	}
 }

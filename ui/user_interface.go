@@ -38,23 +38,23 @@ func (ui *UserInterface) Err(s string, args ...any) {
 **/
 
 // Confirm prompts for a boolean yes/no value.
-func (ui *UserInterface) Confirm(msg string, value bool, help string) (bool, error) {
-	return ui.Prompter.Confirm(msg, value, help)
+func (ui *UserInterface) Confirm(msg string, value bool, opts ...PromptOpt) (bool, error) {
+	return ui.Prompter.Confirm(msg, value, opts...)
 }
 
 // Input prompts for single string value.
-func (ui *UserInterface) Input(msg string, value string, help string) (string, error) {
-	return ui.Prompter.Input(msg, value, help)
+func (ui *UserInterface) Input(msg string, value string, opts ...PromptOpt) (string, error) {
+	return ui.Prompter.Input(msg, value, opts...)
 }
 
 // MultiSelect prompts for a slice of string values w/ a fixed set of options.
-func (ui *UserInterface) MultiSelect(msg string, options []string, values []string, help string) ([]string, error) {
-	return ui.Prompter.MultiSelect(msg, options, values, help)
+func (ui *UserInterface) MultiSelect(msg string, options []string, values []string, opts ...PromptOpt) ([]string, error) {
+	return ui.Prompter.MultiSelect(msg, options, values, opts...)
 }
 
 // Select prompts for single string value w/ a fixed set of options.
-func (ui *UserInterface) Select(msg string, options []string, value string, help string) (string, error) {
-	return ui.Prompter.Select(msg, options, value, help)
+func (ui *UserInterface) Select(msg string, options []string, value string, opts ...PromptOpt) (string, error) {
+	return ui.Prompter.Select(msg, options, value, opts...)
 }
 
 /**
