@@ -30,3 +30,10 @@ func RespondError(err error) Responder {
 		return nil, err
 	}
 }
+
+// RespondDefault creates a responder that returns the prompt's default value.
+func RespondDefault() Responder {
+	return func(p Prompt) (any, error) {
+		return p.Value, nil
+	}
+}
