@@ -14,6 +14,7 @@ require (
 	github.com/mattn/go-isatty v0.0.17
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/prashantv/gostub v1.1.0
+	github.com/spf13/cast v1.5.0
 	github.com/stretchr/testify v1.8.2
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -33,7 +34,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
-	github.com/spf13/cast v1.5.0 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
