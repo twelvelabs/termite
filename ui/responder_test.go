@@ -34,3 +34,12 @@ func TestRespondError(t *testing.T) {
 	assert.ErrorContains(t, err, "boom")
 	assert.Nil(t, response)
 }
+
+func TestRespondDefault(t *testing.T) {
+	responder := RespondDefault()
+	response, err := responder(Prompt{
+		Value: "foo",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "foo", response)
+}
