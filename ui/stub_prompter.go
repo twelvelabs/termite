@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/spf13/cast"
 )
 
 // Stub is a stubbed Prompter invocation.
@@ -36,6 +38,7 @@ func (sp *StubPrompter) Confirm(msg string, value bool, opts ...PromptOpt) (bool
 	prompt := Prompt{
 		Type:    PromptTypeConfirm,
 		Message: msg,
+		Value:   value,
 	}
 	stub, err := sp.match(prompt)
 	if err != nil {
@@ -45,12 +48,12 @@ func (sp *StubPrompter) Confirm(msg string, value bool, opts ...PromptOpt) (bool
 	if err != nil {
 		return false, err
 	}
-	casted := response.(bool)
+	casted := cast.ToBool(response)
 	formatted := "No"
 	if casted {
 		formatted = "Yes"
 	}
-	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, formatted)
+	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, formatted)
 	return casted, nil
 }
 
@@ -59,6 +62,7 @@ func (sp *StubPrompter) Input(msg string, value string, opts ...PromptOpt) (stri
 	prompt := Prompt{
 		Type:    PromptTypeInput,
 		Message: msg,
+		Value:   value,
 	}
 	stub, err := sp.match(prompt)
 	if err != nil {
@@ -68,8 +72,8 @@ func (sp *StubPrompter) Input(msg string, value string, opts ...PromptOpt) (stri
 	if err != nil {
 		return "", err
 	}
-	casted := response.(string)
-	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, casted)
+	casted := cast.ToString(response)
+	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, casted)
 	return casted, nil
 }
 
@@ -78,6 +82,7 @@ func (sp *StubPrompter) MultiSelect(msg string, options []string, values []strin
 	prompt := Prompt{
 		Type:    PromptTypeMultiSelect,
 		Message: msg,
+		Value:   values,
 	}
 	stub, err := sp.match(prompt)
 	if err != nil {
@@ -87,8 +92,8 @@ func (sp *StubPrompter) MultiSelect(msg string, options []string, values []strin
 	if err != nil {
 		return nil, err
 	}
-	casted := response.([]string)
-	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, strings.Join(casted, ", "))
+	casted := cast.ToStringSlice(response)
+	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, strings.Join(casted, ", "))
 	return casted, nil
 }
 
@@ -97,6 +102,7 @@ func (sp *StubPrompter) Select(msg string, options []string, value string, opts 
 	prompt := Prompt{
 		Type:    PromptTypeSelect,
 		Message: msg,
+		Value:   value,
 	}
 	stub, err := sp.match(prompt)
 	if err != nil {
@@ -106,8 +112,8 @@ func (sp *StubPrompter) Select(msg string, options []string, value string, opts 
 	if err != nil {
 		return "", err
 	}
-	casted := response.(string)
-	fmt.Fprintf(sp.ios.Out, "? %s %s", msg, casted)
+	casted := cast.ToString(response)
+	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, casted)
 	return response.(string), nil
 }
 

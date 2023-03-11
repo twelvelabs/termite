@@ -21,10 +21,18 @@ func TestStubPrompter_Confirm(t *testing.T) {
 	)
 	prompter.RegisterStub(
 		MatchConfirm("Proceed?"),
+		RespondDefault(),
+	)
+	prompter.RegisterStub(
+		MatchConfirm("Proceed?"),
 		RespondError(errors.New("boom")),
 	)
 
 	response, err := prompter.Confirm("Proceed?", false)
+	assert.NoError(t, err)
+	assert.Equal(t, true, response)
+
+	response, err = prompter.Confirm("Proceed?", true)
 	assert.NoError(t, err)
 	assert.Equal(t, true, response)
 
@@ -33,9 +41,10 @@ func TestStubPrompter_Confirm(t *testing.T) {
 	assert.Equal(t, false, response)
 
 	_, err = prompter.Confirm("Proceed?", false)
-	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+	assert.ErrorContains(t, err, "wanted 4 of only 3 stubs matching")
 
 	assert.Equal(t, []string{
+		"? Proceed? Yes",
 		"? Proceed? Yes",
 	}, ios.Out.Lines())
 }
@@ -53,6 +62,10 @@ func TestStubPrompter_Input(t *testing.T) {
 	)
 	prompter.RegisterStub(
 		MatchInput("Name:"),
+		RespondDefault(),
+	)
+	prompter.RegisterStub(
+		MatchInput("Name:"),
 		RespondError(errors.New("boom")),
 	)
 
@@ -60,15 +73,20 @@ func TestStubPrompter_Input(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "foo", response)
 
+	response, err = prompter.Input("Name:", "something")
+	assert.NoError(t, err)
+	assert.Equal(t, "something", response)
+
 	response, err = prompter.Input("Name:", "")
 	assert.ErrorContains(t, err, "boom")
 	assert.Equal(t, "", response)
 
 	_, err = prompter.Input("Name:", "")
-	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+	assert.ErrorContains(t, err, "wanted 4 of only 3 stubs matching")
 
 	assert.Equal(t, []string{
 		"? Name: foo",
+		"? Name: something",
 	}, ios.Out.Lines())
 }
 
@@ -85,6 +103,10 @@ func TestStubPrompter_MultiSelect(t *testing.T) {
 	)
 	prompter.RegisterStub(
 		MatchMultiSelect("Colors:"),
+		RespondDefault(),
+	)
+	prompter.RegisterStub(
+		MatchMultiSelect("Colors:"),
 		RespondError(errors.New("boom")),
 	)
 
@@ -92,15 +114,20 @@ func TestStubPrompter_MultiSelect(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"red", "yellow", "blue"}, response)
 
+	response, err = prompter.MultiSelect("Colors:", nil, []string{"purple", "green"})
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"purple", "green"}, response)
+
 	response, err = prompter.MultiSelect("Colors:", nil, nil)
 	assert.ErrorContains(t, err, "boom")
 	assert.Nil(t, response)
 
 	_, err = prompter.MultiSelect("Colors:", nil, nil)
-	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+	assert.ErrorContains(t, err, "wanted 4 of only 3 stubs matching")
 
 	assert.Equal(t, []string{
 		"? Colors: red, yellow, blue",
+		"? Colors: purple, green",
 	}, ios.Out.Lines())
 }
 
@@ -117,6 +144,10 @@ func TestStubPrompter_Select(t *testing.T) {
 	)
 	prompter.RegisterStub(
 		MatchSelect("Country:"),
+		RespondDefault(),
+	)
+	prompter.RegisterStub(
+		MatchSelect("Country:"),
 		RespondError(errors.New("boom")),
 	)
 
@@ -124,15 +155,20 @@ func TestStubPrompter_Select(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "US", response)
 
+	response, err = prompter.Select("Country:", nil, "CA")
+	assert.NoError(t, err)
+	assert.Equal(t, "CA", response)
+
 	response, err = prompter.Select("Country:", nil, "")
 	assert.ErrorContains(t, err, "boom")
 	assert.Equal(t, "", response)
 
 	_, err = prompter.Select("Country:", nil, "")
-	assert.ErrorContains(t, err, "wanted 3 of only 2 stubs matching")
+	assert.ErrorContains(t, err, "wanted 4 of only 3 stubs matching")
 
 	assert.Equal(t, []string{
 		"? Country: US",
+		"? Country: CA",
 	}, ios.Out.Lines())
 }
 
