@@ -35,6 +35,43 @@ func TestAssertFiles(t *testing.T) {
 	})
 }
 
+func TestAssertPathsWhenAssertingMultipleThingsPerPath(t *testing.T) {
+	InTempDir(t, func(dir string) {
+		WritePaths(t, dir, map[string]any{
+			"bin/aaa.sh": "aaa",
+		})
+
+		_ = os.Chmod(filepath.Join(dir, "bin", "aaa.sh"), 0600)
+
+		// Actual `t` assertions - should pass
+		AssertPaths(t, dir, map[string]any{
+			"bin/aaa.sh": []any{
+				"aaa",
+				0600,
+			},
+		})
+
+		// Now assert failure cases using a mock `t`.
+		mt := &mockT{TB: t}
+		AssertPaths(mt, dir, map[string]any{
+			"bin/aaa.sh": []any{
+				"should not match",
+				0600,
+			},
+		})
+		assert.True(t, mt.Failed())
+
+		mt.Reset()
+		AssertPaths(mt, dir, map[string]any{
+			"bin/aaa.sh": []any{
+				"aaa",
+				0755,
+			},
+		})
+		assert.True(t, mt.Failed())
+	})
+}
+
 func TestAssertPathsWhenNilMap(t *testing.T) {
 	// Handles nil w/out error
 	AssertPaths(t, "", nil)

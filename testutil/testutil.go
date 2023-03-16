@@ -64,6 +64,13 @@ func AssertFilePath(tb testing.TB, path string, value any) {
 	} else {
 		// file _should_ be there
 		assert.FileExists(tb, path)
+
+		if assertions, ok := value.([]any); ok {
+			// value is a slice of assertions, recursion time!
+			for _, assertion := range assertions {
+				AssertFilePath(tb, path, assertion)
+			}
+		}
 		if content, ok := value.(string); ok {
 			// value is a string, file content should match
 			buf, _ := os.ReadFile(path)
@@ -173,4 +180,26 @@ func sortedKeys(data map[string]any) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+// TB wrapper for testing assertion failures w/out
+// actually failing tests (seems like this should
+// be possible with TB directly, but :shrug:).
+type mockT struct {
+	testing.TB
+
+	failed bool
+}
+
+// testify failures all end up calling Errorf (not Fail).
+func (mt *mockT) Errorf(format string, args ...any) {
+	mt.failed = true
+}
+
+func (mt *mockT) Failed() bool {
+	return mt.failed
+}
+
+func (mt *mockT) Reset() {
+	mt.failed = false
 }
