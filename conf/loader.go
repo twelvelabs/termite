@@ -5,6 +5,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/caarlos0/env/v8"  // spell: disable-line
 	"github.com/creasty/defaults" // spell: disable-line
 	yaml "gopkg.in/yaml.v3"
 
@@ -69,6 +70,10 @@ func (l *Loader[C]) load() (C, error) {
 		if err != nil {
 			return l.Config, err
 		}
+	}
+	// Override values passed in via ENV var
+	if err := env.Parse(l.Config); err != nil {
+		return l.Config, err
 	}
 	// Validate
 	if err := validate.Struct(l.Config); err != nil {

@@ -27,10 +27,14 @@ func ExampleLoader() {
 }
 
 type MyConfig struct {
-	Name    string `default:"untitled"`
+	Name    string `default:"untitled" env:"CONFIG_NAME"`
 	Count   int    `default:"1" validate:"lt=100"`
 	Enabled bool
 	Tags    []string
+}
+
+type MyConfigWithError struct {
+	Name string `env:"CONFIG_NAME,unknown"` // unknown tag to trigger error
 }
 
 func FixturePath(names ...string) string {
@@ -114,6 +118,24 @@ func TestLoader_LoadWhenYAMLError(t *testing.T) {
 
 	_, err := NewLoader(&MyConfig{}, FixturePath()).Load()
 	assert.ErrorContains(t, err, "boom")
+}
+
+func TestLoader_Load_WithEnv(t *testing.T) {
+	t.Setenv("CONFIG_NAME", "name from env var")
+
+	loader := NewLoader(&MyConfig{}, "")
+	config, err := loader.Load()
+	assert.NoError(t, err)
+	assert.Equal(t, "name from env var", config.Name)
+}
+
+func TestLoader_Load_WhenEnvError(t *testing.T) {
+	t.Setenv("CONFIG_NAME", "name from env var")
+
+	loader := NewLoader(&MyConfigWithError{}, "")
+	config, err := loader.Load()
+	assert.ErrorContains(t, err, `tag option "unknown" not supported`)
+	assert.Equal(t, "", config.Name)
 }
 
 func TestLoader_LoadWhenValidationError(t *testing.T) {
