@@ -35,6 +35,26 @@ func DefaultFuncMap() template.FuncMap {
 	return funcs
 }
 
+// Any attempts to render strings in the given value with data.
+// The input value is assumed to come from an untyped map[string]any
+// (typically from decoding unknown JSON or YAML).
+//
+// Delegates internally to [Map], [Slice], and [String]
+// (see the documentation for those functions for more info).
+// Other types are returned unchanged.
+func Any(value any, data any) (any, error) {
+	switch casted := value.(type) {
+	case map[string]any:
+		return Map(casted, data)
+	case []any:
+		return Slice(casted, data)
+	case string:
+		return String(casted, data)
+	default:
+		return casted, nil
+	}
+}
+
 // File renders the file at path with data.
 func File(path string, data any) (string, error) {
 	name := filepath.Base(path)
@@ -43,6 +63,38 @@ func File(path string, data any) (string, error) {
 		return "", err
 	}
 	return execute(t, data)
+}
+
+// Map recursively renders the keys and values of the given map with data.
+func Map(values map[string]any, data any) (map[string]any, error) {
+	rendered := map[string]any{}
+	for k, v := range values {
+		ka, err := Any(k, data)
+		if err != nil {
+			return nil, err
+		}
+		// We know if `k` was originally a string, `Any` should return as one.
+		k = ka.(string)
+
+		va, err := Any(v, data)
+		if err != nil {
+			return nil, err
+		}
+		rendered[k] = va
+	}
+	return rendered, nil
+}
+
+// Map recursively renders the elements of the given slice with data.
+func Slice(values []any, data any) ([]any, error) {
+	var err error
+	for idx := range values {
+		values[idx], err = Any(values[idx], data)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return values, nil
 }
 
 // String renders the template string with data.
