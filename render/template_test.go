@@ -31,9 +31,87 @@ func TestTemplate_Render(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Hello, World", rendered)
 
+	ts, _ = Compile(`{{ .Something }}`)
+	rendered, err = ts.Render(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "", rendered)
+
 	ts, _ = Compile(`Hello, {{ fail "boom" }}`)
 	rendered, err = ts.Render(nil)
 	assert.ErrorContains(t, err, "fail: boom")
+	assert.Equal(t, "", rendered)
+}
+
+func TestTemplate_RenderBool(t *testing.T) {
+	ts, _ := Compile(`{{ .Value }}`)
+	rendered, err := ts.RenderBool(map[string]any{
+		"Value": "true",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, true, rendered)
+
+	ts, _ = Compile(`{{ .Value }}`)
+	rendered, err = ts.RenderBool(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, false, rendered)
+
+	ts, _ = Compile(`{{ .Value }}`)
+	rendered, err = ts.RenderBool(map[string]any{
+		"Value": "not-a-bool",
+	})
+	assert.ErrorContains(t, err, "invalid syntax")
+	assert.Equal(t, false, rendered)
+
+	ts, _ = Compile(`{{ fail "boom" }}`)
+	rendered, err = ts.RenderBool(nil)
+	assert.ErrorContains(t, err, "fail: boom")
+	assert.Equal(t, false, rendered)
+}
+
+func TestTemplate_RenderInt(t *testing.T) {
+	ts, _ := Compile(`{{ .Value }}`)
+	rendered, err := ts.RenderInt(map[string]any{
+		"Value": "12",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 12, rendered)
+
+	ts, _ = Compile(`{{ .Value }}`)
+	rendered, err = ts.RenderInt(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, rendered)
+
+	ts, _ = Compile(`{{ .Value }}`)
+	rendered, err = ts.RenderInt(map[string]any{
+		"Value": "not-a-number",
+	})
+	assert.ErrorContains(t, err, "unable to cast")
+	assert.Equal(t, 0, rendered)
+
+	ts, _ = Compile(`{{ fail "boom" }}`)
+	rendered, err = ts.RenderInt(nil)
+	assert.ErrorContains(t, err, "fail: boom")
+	assert.Equal(t, 0, rendered)
+}
+
+func TestTemplate_RenderRequired(t *testing.T) {
+	ts, _ := Compile(`{{ .Value }}`)
+	rendered, err := ts.RenderRequired(map[string]any{
+		"Value": "Howdy",
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "Howdy", rendered)
+
+	ts, _ = Compile(`{{ fail "boom" }}`)
+	rendered, err = ts.RenderRequired(nil)
+	assert.ErrorContains(t, err, "fail: boom")
+	assert.Equal(t, "", rendered)
+
+	ts, _ = Compile(`{{ .Value }}`)
+	rendered, err = ts.RenderRequired(map[string]any{
+		"Value": "",
+	})
+	assert.ErrorContains(t, err, "empty string")
 	assert.Equal(t, "", rendered)
 }
 

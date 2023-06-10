@@ -1,7 +1,15 @@
 package render
 
 import (
+	"fmt"
 	"text/template"
+
+	"github.com/spf13/cast"
+)
+
+const (
+	strEmpty   string = ""
+	strNoValue string = "<no value>"
 )
 
 // Compile parses a template string and returns, if successful,
@@ -45,7 +53,51 @@ func (ts *Template) UnmarshalText(text []byte) error {
 	return err
 }
 
-// Render renders the template using data.
+// Render renders the template as a string.
 func (ts *Template) Render(data any) (string, error) {
-	return execute(ts.t, data)
+	rendered, err := execute(ts.t, data)
+	if err != nil {
+		return strEmpty, err
+	}
+	if rendered == strEmpty || rendered == strNoValue {
+		return strEmpty, nil
+	}
+	return rendered, nil
+}
+
+// Render renders the template as a bool.
+func (ts *Template) RenderBool(data any) (bool, error) {
+	rendered, err := ts.Render(data)
+	if err != nil {
+		return false, err
+	}
+	if rendered == strEmpty {
+		return false, nil
+	}
+	return cast.ToBoolE(rendered)
+}
+
+// Render renders the template as an int.
+func (ts *Template) RenderInt(data any) (int, error) {
+	rendered, err := ts.Render(data)
+	if err != nil {
+		return 0, err
+	}
+	if rendered == strEmpty {
+		return 0, nil
+	}
+	return cast.ToIntE(rendered)
+}
+
+// RenderRequired renders the template as a string,
+// but returns an error if the result is empty.
+func (ts *Template) RenderRequired(data any) (string, error) {
+	rendered, err := ts.Render(data)
+	if err != nil {
+		return strEmpty, err
+	}
+	if rendered == strEmpty {
+		return strEmpty, fmt.Errorf("evaluated to an empty string")
+	}
+	return rendered, nil
 }

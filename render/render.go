@@ -108,7 +108,7 @@ func String(s string, data any) (string, error) {
 
 func execute(t *template.Template, data any) (string, error) {
 	if t == nil {
-		return "", nil
+		return strEmpty, nil
 	}
 	buf := bytes.Buffer{}
 	err := t.Execute(&buf, data)
