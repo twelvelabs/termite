@@ -11,6 +11,7 @@
         "Cygwin",
         "dasherize",
         "flect",
+        "fsutil",
         "gobuffalo",
         "golangci",
         "GOPROXY",
