@@ -64,14 +64,20 @@ func TestTemplate_UnmarshalText(t *testing.T) {
 func TestTemplate_UnmarshalFromYAML(t *testing.T) {
 	s := `greeting: "Hello, {{ .Name }}"`
 	mapping := struct {
-		Greeting *Template `yaml:"greeting"`
+		Greeting Template `yaml:"greeting"`
+		Missing  Template `yaml:"missing"`
 	}{}
 	err := yaml.Unmarshal([]byte(s), &mapping)
 	assert.NoError(t, err)
 
-	rendered, err := mapping.Greeting.Render(map[string]any{
+	data := map[string]any{
 		"Name": "World",
-	})
+	}
+	rendered, err := mapping.Greeting.Render(data)
 	assert.NoError(t, err)
 	assert.Equal(t, "Hello, World", rendered)
+
+	rendered, err = mapping.Missing.Render(data)
+	assert.NoError(t, err)
+	assert.Equal(t, "", rendered)
 }
