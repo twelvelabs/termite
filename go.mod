@@ -3,7 +3,7 @@ module github.com/twelvelabs/termite
 go 1.20
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.6
+	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/briandowns/spinner v1.23.0
 	github.com/caarlos0/env/v8 v8.0.0
