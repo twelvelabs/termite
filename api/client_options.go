@@ -22,5 +22,5 @@ type ClientOptions struct {
 
 	// Transport specifies the mechanism by which individual API requests are made.
 	// Default is http.DefaultTransport.
-	Transport *http.Transport
+	Transport http.RoundTripper
 }
