@@ -16,13 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # pin@v4.1.1
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # pin@v5.0.0
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: true
 
       - name: Build
         run: make build
@@ -31,7 +30,7 @@ jobs:
         run: make test
 
       - name: Coverage
-        uses: codecov/codecov-action@54bcd8715eee62d40e33596ef5e8f0f48dbbccab # pin@v4.1.0
+        uses: codecov/codecov-action@v4
         with:
           files: coverage.out
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -43,18 +42,17 @@ jobs:
       pull-requests: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # pin@v4.1.1
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # pin@v5.0.0
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: true
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # pin@v3.7.0
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
+          version: v1.61
           only-new-issues: true
 
   release:
@@ -67,20 +65,19 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # pin@v4.1.1
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # pin@v5.0.0
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: true
 
       - name: Release
-        uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 # pin@v5.0.0
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
+          version: ~> 2.3
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
