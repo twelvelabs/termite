@@ -44,7 +44,7 @@ func translateErr(key string, err error) error {
 	}
 
 	sort.Strings(translations)
-	err = fmt.Errorf(strings.Join(translations, ", "))
+	err = errors.New(strings.Join(translations, ", "))
 	return err
 }
 
