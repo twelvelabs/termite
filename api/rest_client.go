@@ -49,6 +49,15 @@ type RESTClient struct {
 	BaseURL string
 }
 
+type RESTClientError struct {
+	HTTPResponse *http.Response
+	Message      string
+}
+
+func (e *RESTClientError) Error() string {
+	return fmt.Sprintf("HTTP %d: %s", e.HTTPResponse.StatusCode, e.Message)
+}
+
 // RegisterStub registers a new stub for the given matcher/responder pair.
 func (c *RESTClient) RegisterStub(matcher Matcher, responder Responder) *RESTClient {
 	c.Client.RegisterStub(matcher, responder)
@@ -91,10 +100,8 @@ func (c *RESTClient) DoWithContext(ctx context.Context, method string, url strin
 
 	success := resp.StatusCode >= 200 && resp.StatusCode < 300
 	if !success {
-		// defer resp.Body.Close()
-		// api.HandleHTTPError(resp)
-		// TODO: return a proper error type
-		return fmt.Errorf("HTTP %d", resp.StatusCode)
+		defer resp.Body.Close()
+		return &RESTClientError{resp, "received unsuccessful response"}
 	}
 
 	if resp.StatusCode == http.StatusNoContent {
