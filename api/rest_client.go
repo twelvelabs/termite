@@ -51,11 +51,14 @@ type RESTClient struct {
 
 type RESTClientError struct {
 	HTTPResponse *http.Response
-	Message      string
 }
 
 func (e *RESTClientError) Error() string {
-	return fmt.Sprintf("HTTP %d: %s", e.HTTPResponse.StatusCode, e.Message)
+	responseBody, err := ioReadAll(e.HTTPResponse.Body)
+	if err != nil {
+		return err.Error()
+	}
+	return fmt.Sprintf("HTTP %d: %s", e.HTTPResponse.StatusCode, responseBody)
 }
 
 // RegisterStub registers a new stub for the given matcher/responder pair.
@@ -101,7 +104,7 @@ func (c *RESTClient) DoWithContext(ctx context.Context, method string, url strin
 	success := resp.StatusCode >= 200 && resp.StatusCode < 300
 	if !success {
 		defer resp.Body.Close()
-		return &RESTClientError{resp, "received unsuccessful response"}
+		return &RESTClientError{resp}
 	}
 
 	if resp.StatusCode == http.StatusNoContent {
