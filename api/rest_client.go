@@ -100,7 +100,7 @@ func (c *RESTClient) DoWithContext(ctx context.Context, method string, url strin
 
 	success := resp.StatusCode >= 200 && resp.StatusCode < 300
 	if !success {
-		defer resp.Body.Close()
+		// defer resp.Body.Close()
 		return &RESTClientError{resp, "received unsuccessful response"}
 	}
 
