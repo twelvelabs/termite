@@ -97,7 +97,10 @@ func TestRESTClient_DoWithContext_SuccessError(t *testing.T) {
 	defer client.VerifyStubs(t)
 
 	err := client.DoWithContext(ctx, http.MethodGet, "/greet", "", nil)
-	assert.ErrorContains(t, err, "HTTP 500")
+	myErr, ok := err.(*RESTClientError)
+	assert.True(t, ok)
+	assert.Equal(t, 500, myErr.HTTPResponse.StatusCode)
+	assert.ErrorContains(t, err, "HTTP 500: received unsuccessful response")
 }
 
 func TestRESTClient_DoWithContext_NoContent(t *testing.T) {
