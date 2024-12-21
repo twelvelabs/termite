@@ -1,0 +1,36 @@
+version: "0.2"
+allowCompoundWords: true
+language: en
+dictionaries:
+  - bash
+  - cpp
+  - golang
+ignorePaths:
+  - .git/
+  - .gitignore
+  - .golangci.yml
+  - cspell.yml
+  - go.mod
+  - go.sum
+  - Makefile
+  - ./run/executor_test.go
+ignoreRegExpList:
+  - /import \([^)]+\)/g
+words:
+  - baney
+  - codecov
+  - errcheck
+  - errgroup
+  - flect
+  - fsutil
+  - gofmt
+  - golangci
+  - goreleaser
+  - gostub
+  - oneof
+  - twelvelabs
+  - welp
+  - yolo
+  - ordinalize
+  - pascalize
+  - titleize

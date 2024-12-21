@@ -55,7 +55,7 @@ func TestCmd_DebugString(t *testing.T) {
 	cmd.Stdin = bytes.NewBufferString("hello")
 	assert.Equal(t, `/bin/cat [Stdin: "hello"]`, cmd.DebugString())
 
-	cmd.Stdin = bytes.NewBufferString("Lorem ipsum dolor sit amet")
+	cmd.Stdin = bytes.NewBufferString("Lorem ipsum dolor sit amet") // cspell:disable-line
 	assert.Equal(t, `/bin/cat [Stdin: "Lorem ipsum dolor si…"]`, cmd.DebugString())
 }
 

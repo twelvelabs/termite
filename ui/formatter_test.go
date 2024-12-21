@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// cspell: ignoreRegExp (Magenta|Cyan|Red|Yellow|Blue|Green|Gray|Bold|Underline)f
 func TestFormatter(t *testing.T) {
 	formatter := NewFormatter(true)
 
