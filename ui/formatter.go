@@ -25,6 +25,7 @@ import (
 	"github.com/mgutz/ansi" //cspell: disable-line
 )
 
+// cspell: ignoreRegExp (Magenta|Cyan|Red|Yellow|Blue|Green|Gray|Bold|Underline)f
 var (
 	magenta   = ansi.ColorFunc("magenta")
 	cyan      = ansi.ColorFunc("cyan")

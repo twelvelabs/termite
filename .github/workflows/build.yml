@@ -55,6 +55,9 @@ jobs:
           version: v1.61
           only-new-issues: true
 
+      - name: cspell
+        uses: streetsidesoftware/cspell-action@v6
+
   release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')

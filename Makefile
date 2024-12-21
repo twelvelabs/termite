@@ -20,6 +20,8 @@ lint: ## Lint the code
 	golangci-lint run
 	@if ! command -v actionlint >/dev/null 2>&1; then go install github.com/rhysd/actionlint/cmd/actionlint@latest; fi
 	actionlint
+	@if ! command -v cspell >/dev/null 2>&1; then npm install --global cspell; fi
+	cspell lint --no-progress --show-suggestions .
 
 .PHONY: test
 test: export APP_ENV := test
