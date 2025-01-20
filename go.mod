@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/briandowns/spinner v1.23.1
+	github.com/briandowns/spinner v1.23.2
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/creasty/defaults v1.8.0
 	github.com/go-playground/locales v0.14.1
