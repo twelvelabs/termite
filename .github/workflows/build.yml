@@ -56,7 +56,7 @@ jobs:
           only-new-issues: true
 
       - name: cspell
-        uses: streetsidesoftware/cspell-action@v6
+        uses: streetsidesoftware/cspell-action@v7
 
   release:
     runs-on: ubuntu-latest
