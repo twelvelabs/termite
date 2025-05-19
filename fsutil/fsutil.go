@@ -80,7 +80,9 @@ func EnsureDirWritable(path string) error {
 	if err := osWriteFile(f, []byte(""), DefaultFileMode); err != nil {
 		return fmt.Errorf("ensure writable: %w", err)
 	}
-	defer os.Remove(f)
+	defer func() {
+		_ = os.Remove(f)
+	}()
 
 	return nil
 }

@@ -26,11 +26,11 @@ type UserInterface struct {
 }
 
 func (ui *UserInterface) Out(s string, args ...any) {
-	fmt.Fprintf(ui.ios.Out, s, args...)
+	_, _ = fmt.Fprintf(ui.ios.Out, s, args...)
 }
 
 func (ui *UserInterface) Err(s string, args ...any) {
-	fmt.Fprintf(ui.ios.Err, s, args...)
+	_, _ = fmt.Fprintf(ui.ios.Err, s, args...)
 }
 
 /**

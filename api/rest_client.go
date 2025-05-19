@@ -110,7 +110,9 @@ func (c *RESTClient) DoWithContext(ctx context.Context, method string, url strin
 		return nil
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	b, err := ioReadAll(resp.Body)
 	if err != nil {

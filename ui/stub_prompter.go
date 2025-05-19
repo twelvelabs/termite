@@ -53,7 +53,7 @@ func (sp *StubPrompter) Confirm(msg string, value bool, opts ...PromptOpt) (bool
 	if casted {
 		formatted = "Yes"
 	}
-	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, formatted)
+	_, _ = fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, formatted)
 	return casted, nil
 }
 
@@ -73,7 +73,7 @@ func (sp *StubPrompter) Input(msg string, value string, opts ...PromptOpt) (stri
 		return "", err
 	}
 	casted := cast.ToString(response)
-	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, casted)
+	_, _ = fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, casted)
 	return casted, nil
 }
 
@@ -93,7 +93,7 @@ func (sp *StubPrompter) MultiSelect(msg string, options []string, values []strin
 		return nil, err
 	}
 	casted := cast.ToStringSlice(response)
-	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, strings.Join(casted, ", "))
+	_, _ = fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, strings.Join(casted, ", "))
 	return casted, nil
 }
 
@@ -113,7 +113,7 @@ func (sp *StubPrompter) Select(msg string, options []string, value string, opts 
 		return "", err
 	}
 	casted := cast.ToString(response)
-	fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, casted)
+	_, _ = fmt.Fprintf(sp.ios.Out, "? %s %s\n", msg, casted)
 	return response.(string), nil
 }
 

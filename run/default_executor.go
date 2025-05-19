@@ -10,7 +10,7 @@ type defaultExecutor struct {
 }
 
 func (e *defaultExecutor) ExitCode(cmd *Cmd) int {
-	return cmd.Cmd.ProcessState.ExitCode()
+	return cmd.ProcessState.ExitCode()
 }
 
 func (e *defaultExecutor) Output(cmd *Cmd) ([]byte, error) {
