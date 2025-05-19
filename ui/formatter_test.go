@@ -12,7 +12,7 @@ func TestFormatter(t *testing.T) {
 	formatter := NewFormatter(true)
 
 	var start string
-	var stop string = ansi.Reset
+	var stop = ansi.Reset
 
 	start = ansi.ColorCode("default+b")
 	assert.Equal(t, (start + "text" + stop), formatter.Bold("text"))
