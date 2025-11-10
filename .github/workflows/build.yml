@@ -55,7 +55,7 @@ jobs:
           version: v2.1
 
       - name: cspell
-        uses: streetsidesoftware/cspell-action@v7
+        uses: streetsidesoftware/cspell-action@v8
 
   release:
     runs-on: ubuntu-latest
