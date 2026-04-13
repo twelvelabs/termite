@@ -12,7 +12,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/gobuffalo/flect v1.0.3
-	github.com/mattn/go-isatty v0.0.20
+	github.com/mattn/go-isatty v0.0.21
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/prashantv/gostub v1.1.0
 	github.com/spf13/cast v1.10.0
